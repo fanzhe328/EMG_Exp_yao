@@ -1,0 +1,7 @@
+/data1/*
+/data2/*
+/data4/*
+/result/*
+/train/*
+/train*/*
+*.pyc
