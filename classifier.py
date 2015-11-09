@@ -228,6 +228,11 @@ def training_lda_TD4_inter(my_clfs, trains, tests, classes, **kw):
                           tol=0.0001)
     test_rate_list = [0.2]
 
+    scores = sklearn.cross_validation.cross_val_score(
+        clf, trains, classes, cv=10)
+    results.append(['feat_TD4_cv_5', 'lda(svd,tol=0.0001)', 'O',
+                    1.0, scores.mean(), scores.std()])
+
     for i in test_rate_list:
         for idx, channel_pos in enumerate(kw['pos_list']):
 
