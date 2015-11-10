@@ -362,6 +362,6 @@ if __name__ == '__main__':
     # feature_distribute(3)
     feature_distribute_4_projection(4, 'pca')
     feature_distribute_4_projection(4, 'lda')
-    # feature_distribute_3_projection(4, 'pca')
-    # feature_distribute_3_projection(4, 'lda')
+    feature_distribute_3_projection(4, 'pca')
+    feature_distribute_3_projection(4, 'lda')
 
