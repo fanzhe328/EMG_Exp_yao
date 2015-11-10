@@ -1,12 +1,12 @@
 # *-* coding: UTF-8 *-*
-import os
+import os, sys
 import numpy as np
 
 
 root_path = os.getcwd()
 
 
-def load_feature_dataset(dir='train1', subject='subject_1'):
+def load_feature_dataset(dir='train1_250_100', subject='subject_1'):
     ''' 读取样本数据和类别数据， dir表示实验组名称，subject表示受试者，subject_all表示所有受试者'''
     if subject == 'subject_all':
         file_path = root_path + '/' + dir + '/subject_1'
@@ -64,3 +64,7 @@ def load_signal_dataset(dir='train1', subject='subject_1'):
 def feature_normalized():
     ''' 特征归一化 2015-10-28 '''
     pass
+
+
+if __name__ == '__main__':
+    load_feature_dataset()
