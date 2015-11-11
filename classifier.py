@@ -72,7 +72,7 @@ def training_lda_TD4_intra(my_clfs, trains, classes, **kw):
     # proportion is 1.0  cv=5
     scores = sklearn.cross_validation.cross_val_score(
         clf, trains, classes, cv=10)
-    results.append(['feat_TD4_cv_5', 'lda(svd,tol=0.0001)', channel_pos,
+    results.append(['feat_TD4_cv_5', 'lda(svd;tol=0.0001)', channel_pos,
                     1.0, scores.mean(), scores.std()])
 
     for i in test_rate_list:
@@ -185,21 +185,21 @@ def training_lda_TD4_intra(my_clfs, trains, classes, **kw):
             # results.append(['feat_TD4', 'lda(svd,tol=0.0001)', '0.6', scores.mean(), scores.std()])
 
             iteration -= 1
-        results.append(['feat_TD4', 'lda(svd,tol=0.0001,test_rate=' +
+        results.append(['feat_TD4', 'lda(svd;tol=0.0001;test_rate=' +
                         str(i) + ')', channel_pos, '1.0', np.mean(scores_1_0), np.std(scores_1_0)])
-        results.append(['feat_TD4', 'lda(svd,tol=0.0001,test_rate=' +
+        results.append(['feat_TD4', 'lda(svd;tol=0.0001;test_rate=' +
                         str(i) + ')', channel_pos, '0.9', np.mean(scores_0_9), np.std(scores_0_9)])
-        results.append(['feat_TD4', 'lda(svd,tol=0.0001,test_rate=' +
+        results.append(['feat_TD4', 'lda(svd;tol=0.0001;test_rate=' +
                         str(i) + ')', channel_pos, '0.8', np.mean(scores_0_8), np.std(scores_0_8)])
-        results.append(['feat_TD4', 'lda(svd,tol=0.0001,test_rate=' + str(i) + ')',
+        results.append(['feat_TD4', 'lda(svd;tol=0.0001;test_rate=' + str(i) + ')',
                         '0.8+0.9', channel_pos, np.mean(scores_0_89), np.std(scores_0_89)])
-        results.append(['feat_TD4', 'lda(svd,tol=0.0001,test_rate=' +
+        results.append(['feat_TD4', 'lda(svd;tol=0.0001;test_rate=' +
                         str(i) + ')', channel_pos, '1.1', np.mean(scores_1_1), np.std(scores_1_1)])
-        results.append(['feat_TD4', 'lda(svd,tol=0.0001,test_rate=' +
+        results.append(['feat_TD4', 'lda(svd;tol=0.0001;test_rate=' +
                         str(i) + ')', channel_pos, '1.2', np.mean(scores_1_2), np.std(scores_1_2)])
-        results.append(['feat_TD4', 'lda(svd,tol=0.0001,test_rate=' +
+        results.append(['feat_TD4', 'lda(svd;tol=0.0001;test_rate=' +
                         str(i) + ')', channel_pos, '1.1+0.9', np.mean(scores_19), np.std(scores_19)])
-        results.append(['feat_TD4', 'lda(svd,tol=0.0001,test_rate=' + str(i) + ')', channel_pos,
+        results.append(['feat_TD4', 'lda(svd;tol=0.0001;test_rate=' + str(i) + ')', channel_pos,
                         '1.1+0.9+1.2+0.8', np.mean(scores_1289), np.std(scores_1289)])
 
     log_result(results, log_fold + '/' + log_file + '_' + channel_pos + '_' + str(kw['num']), 2)
@@ -230,7 +230,7 @@ def training_lda_TD4_inter(my_clfs, trains, tests, classes, **kw):
 
     scores = sklearn.cross_validation.cross_val_score(
         clf, trains, classes, cv=10)
-    results.append(['feat_TD4_cv_5', 'lda(svd,tol=0.0001)', 'O',
+    results.append(['feat_TD4_cv_5', 'lda(svd;tol=0.0001)', 'O',
                     1.0, scores.mean(), scores.std()])
 
     for i in test_rate_list:
@@ -336,21 +336,21 @@ def training_lda_TD4_inter(my_clfs, trains, tests, classes, **kw):
                 scores_1289[iteration] = scores.mean()
 
                 iteration -= 1
-            results.append(['feat_TD4', 'lda(svd,tol=0.0001,test_rate=' +
+            results.append(['feat_TD4', 'lda(svd;tol=0.0001;test_rate=' +
                             str(i) + ')', channel_pos, '1.0', np.mean(scores_1_0), np.std(scores_1_0)])
-            results.append(['feat_TD4', 'lda(svd,tol=0.0001,test_rate=' +
+            results.append(['feat_TD4', 'lda(svd;tol=0.0001;test_rate=' +
                             str(i) + ')', channel_pos, '0.9', np.mean(scores_0_9), np.std(scores_0_9)])
-            results.append(['feat_TD4', 'lda(svd,tol=0.0001,test_rate=' +
+            results.append(['feat_TD4', 'lda(svd;tol=0.0001;test_rate=' +
                             str(i) + ')', channel_pos, '0.8', np.mean(scores_0_8), np.std(scores_0_8)])
-            results.append(['feat_TD4', 'lda(svd,tol=0.0001,test_rate=' + str(i) + ')',
+            results.append(['feat_TD4', 'lda(svd;tol=0.0001;test_rate=' + str(i) + ')',
                             '0.8+0.9', channel_pos, np.mean(scores_0_89), np.std(scores_0_89)])
-            results.append(['feat_TD4', 'lda(svd,tol=0.0001,test_rate=' +
+            results.append(['feat_TD4', 'lda(svd;tol=0.0001;test_rate=' +
                             str(i) + ')', channel_pos, '1.1', np.mean(scores_1_1), np.std(scores_1_1)])
-            results.append(['feat_TD4', 'lda(svd,tol=0.0001,test_rate=' +
+            results.append(['feat_TD4', 'lda(svd;tol=0.0001;test_rate=' +
                             str(i) + ')', channel_pos, '1.2', np.mean(scores_1_2), np.std(scores_1_2)])
-            results.append(['feat_TD4', 'lda(svd,tol=0.0001,test_rate=' +
+            results.append(['feat_TD4', 'lda(svd;tol=0.0001;test_rate=' +
                             str(i) + ')', channel_pos, '1.1+0.9', np.mean(scores_19), np.std(scores_19)])
-            results.append(['feat_TD4', 'lda(svd,tol=0.0001,test_rate=' + str(i) + ')', channel_pos,
+            results.append(['feat_TD4', 'lda(svd;tol=0.0001;test_rate=' + str(i) + ')', channel_pos,
                             '1.1+0.9+1.2+0.8', np.mean(scores_1289), np.std(scores_1289)])
 
     log_result(results, log_fold + '/' + log_file + '_' + str(kw['num']), 2)
@@ -428,13 +428,13 @@ def training_lda_TD4_cross(my_clfs, X_train, y_train, X_test, y_test, **kw):
             # results.append(['feat_TD4', 'lda(svd,tol=0.0001)', '0.8+0.9', scores.mean(), scores.std()])
 
             iteration -= 1
-        results.append(['feat_TD4', 'lda(svd,tol=0.0001,test_rate=' +
+        results.append(['feat_TD4', 'lda(svd;tol=0.0001;test_rate=' +
                         str(i) + ')', '1.0', np.mean(scores_1_0), np.std(scores_1_0)])
-        results.append(['feat_TD4', 'lda(svd,tol=0.0001,test_rate=' +
+        results.append(['feat_TD4', 'lda(svd;tol=0.0001;test_rate=' +
                         str(i) + ')', '0.9', np.mean(scores_0_9), np.std(scores_0_9)])
-        results.append(['feat_TD4', 'lda(svd,tol=0.0001,test_rate=' +
+        results.append(['feat_TD4', 'lda(svd;tol=0.0001;test_rate=' +
                         str(i) + ')', '0.8', np.mean(scores_0_8), np.std(scores_0_8)])
-        results.append(['feat_TD4', 'lda(svd,tol=0.0001,test_rate=' + str(i) + ')',
+        results.append(['feat_TD4', 'lda(svd;tol=0.0001;test_rate=' + str(i) + ')',
                         '0.8+0.9', np.mean(scores_0_89), np.std(scores_0_89)])
 
     log_result(results, log_file + '_' + str(kw['num']), 2)

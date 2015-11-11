@@ -148,17 +148,17 @@ if __name__ == '__main__':
     #     subject_list, winsize, incsize, samrate)
 
     # z_scores = [ True, False]
-    # z_scores = [True]
+    z_scores = [True]
 
-    # for z_score in z_scores:
-    #     train_dataset_feature_intra(
-    #         train_dir, subject_list, feature_type,
-    #         input_dir, fold_pre, z_score, channel_pos_list)
+    for z_score in z_scores:
+        train_dataset_feature_intra(
+            train_dir, subject_list, feature_type,
+            input_dir, fold_pre, z_score, channel_pos_list)
 
-    # for z_score in z_scores:
-    #     train_dataset_feature_inter(
-    #         train_dir, subject_list, feature_type,
-    #         input_dir, fold_pre, z_score, channel_pos_list)
+    for z_score in z_scores:
+        train_dataset_feature_inter(
+            train_dir, subject_list, feature_type,
+            input_dir, fold_pre, z_score, channel_pos_list)
 
     train_dir = 'train4_' + fold_pre
     input_dir = 'data4'
@@ -169,6 +169,12 @@ if __name__ == '__main__':
     #                 subject_list, winsize, incsize, samrate)
 
     z_scores = [True]
+    
+    for z_score in z_scores:
+        train_dataset_feature_intra(
+            train_dir, subject_list, feature_type,
+            input_dir, fold_pre, z_score, channel_pos_list)
+
     for z_score in z_scores:
         train_dataset_feature_inter(
             train_dir, subject_list, feature_type,
