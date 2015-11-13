@@ -192,7 +192,7 @@ def training_lda_TD4_intra(my_clfs, trains, classes, **kw):
         results.append(['feat_TD4', 'lda(svd;tol=0.0001;test_rate=' +
                         str(i) + ')', channel_pos, '0.8', np.mean(scores_0_8), np.std(scores_0_8)])
         results.append(['feat_TD4', 'lda(svd;tol=0.0001;test_rate=' + str(i) + ')',
-                        '0.8+0.9', channel_pos, np.mean(scores_0_89), np.std(scores_0_89)])
+                        channel_pos, '0.8+0.9', np.mean(scores_0_89), np.std(scores_0_89)])
         results.append(['feat_TD4', 'lda(svd;tol=0.0001;test_rate=' +
                         str(i) + ')', channel_pos, '1.1', np.mean(scores_1_1), np.std(scores_1_1)])
         results.append(['feat_TD4', 'lda(svd;tol=0.0001;test_rate=' +
@@ -343,7 +343,7 @@ def training_lda_TD4_inter(my_clfs, trains, tests, classes, **kw):
             results.append(['feat_TD4', 'lda(svd;tol=0.0001;test_rate=' +
                             str(i) + ')', channel_pos, '0.8', np.mean(scores_0_8), np.std(scores_0_8)])
             results.append(['feat_TD4', 'lda(svd;tol=0.0001;test_rate=' + str(i) + ')',
-                            '0.8+0.9', channel_pos, np.mean(scores_0_89), np.std(scores_0_89)])
+                            channel_pos, '0.8+0.9', np.mean(scores_0_89), np.std(scores_0_89)])
             results.append(['feat_TD4', 'lda(svd;tol=0.0001;test_rate=' +
                             str(i) + ')', channel_pos, '1.1', np.mean(scores_1_1), np.std(scores_1_1)])
             results.append(['feat_TD4', 'lda(svd;tol=0.0001;test_rate=' +
