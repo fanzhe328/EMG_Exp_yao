@@ -11,7 +11,7 @@ from preprocess import load_raw_dataset
 
 
 
-def feature_stability_O2O():
+def feature_stability_O2O(channel_group='1'):
     ''' 对每个特征，分析其在不同移位程度的的均值和方差 '''
     # print root_path
     # sys.exit(0)
@@ -22,14 +22,14 @@ def feature_stability_O2O():
     # print subjects
     # sys.exit(0)
     for subject in subjects:
-        title_pre = subject + '_feature_class_'
+        title_pre = subject 
         actions = [i + 1 for i in range(6)]
         # actions = [1]
         for action in actions:
             print 'Generate action: ', action
-            title = title_pre + str(action)
-
-            feature = np.load(root_path + '/train1_250_100/' + title + '.npy')
+            filename = title_pre + '_feature_class_' + str(action)
+            title = title_pre + '_action_' + str(action)
+            feature = np.load(root_path + '/train1_200_100/' + filename + '.npy')
             channel_num = 34                # 实验中的通道总数
             channel_group_len = 2           # 双通道
             channel_span = 17               # 双通道中一组电极两个位置的跨度
@@ -47,17 +47,20 @@ def feature_stability_O2O():
                 for i in xrange(channel_num/channel_group_len):
                     # print i*feat_num+feat_ind, i*feat_num+feat_ind+channel_span*feat_num
 
-                    temp = np.concatenate(
-                        (feature[:, i*feat_num+feat_ind], feature[:, i*feat_num+feat_ind+channel_span*feat_num]),
-                        axis = None)
-                    # print temp.shape
-                    # sys.exit(0)
-                    # temp = feature[:, feat_ind + i * step]
+                    if channel_group == '1&2':
+                        # group 1 and 2
+                        temp = np.concatenate(
+                            (feature[:, i*feat_num+feat_ind], feature[:, i*feat_num+feat_ind+channel_span*feat_num]),
+                            axis = None)
+                    elif channel_group == '1':
+                        # group 1
+                        temp = feature[:, i*feat_num+feat_ind]
+                    elif channel_group == '2':
+                        # group 2
+                        temp = feature[:, i*feat_num+feat_ind+channel_span*feat_num]
+
                     means_list[i] = np.mean(temp, axis=0)
                     stds_list[i] = np.std(temp, axis=0)
-
-                # print means_list, stds_list
-            # sys.exit(0)
 
                 labels = np.arange(channel_num)
                 ind = np.array([i * 2 for i in range(channel_num/channel_group_len)])
@@ -69,18 +72,18 @@ def feature_stability_O2O():
 
                 ax.set_ylabel('Scores')
                 # ax.set_xlim(0,64)
-                ax.set_title(title + '_O2O_' + feature_name)
+                ax.set_title(title + '_group_1&2_O2O_' + feature_name)
                 ax.set_xticks(ind + width / 2)
                 ax.set_xticklabels(channel_pos_list)
                 # plt.show()
                 # if feat_ind == 1:
                 #     sys.exit(0)
                 plt.savefig('result/figure/stability/' +
-                            title + '_O2O_' + feature_name, dpi=120)
+                            title + '_group_'+channel_group+'_O2O_' + feature_name, dpi=120)
                 plt.close()
 
-def feature_stability_O2A():
-    ''' 对每个特征，分析其在不移位和在所谓情况下的均值和方差 '''
+def feature_stability_O2A(channel_group='1'):
+    ''' 对每个特征，分析其在不移位和在所有情况下的均值和方差 '''
     # print root_path
     # sys.exit(0)
     channel_pos_list = ['O',                                # 中心位置
@@ -93,15 +96,14 @@ def feature_stability_O2A():
     # print xtickslabels
     # print subjects
     # sys.exit(0)
-    for subject in subjects:
-        title_pre = subject + '_feature_class_'
+    for subject in subjects: 
         actions = [i + 1 for i in range(6)]
         # actions = [1]
         for action in actions:
             print 'Generate action: ', action
-            title = title_pre + str(action)
+            filename = subject + '_feature_class_' + str(action)
 
-            feature = np.load(root_path + '/train1_250_100/' + title + '.npy')
+            feature = np.load(root_path + '/train1_200_100/' + filename + '.npy')
             channel_num = 34                # 实验中的通道总数
             channel_group_len = 2           # 双通道
             channel_span = 17               # 双通道中一组电极两个位置的跨度
@@ -116,16 +118,33 @@ def feature_stability_O2A():
 
                 # print type(means_list[0]), means_list.shape
                 # print feature.shape
-                feature_O = np.concatenate(
-                        (feature[:, feat_ind], feature[:, feat_ind+channel_span*feat_num]),
+                if channel_group == '1&2':
+                    # group 1 and 2
+                    feature_O = np.concatenate(
+                            (feature[:, feat_ind], feature[:, feat_ind+channel_span*feat_num]),
                         axis = None)
+                elif channel_group == '1':
+                    # group 1
+                    feature_O = feature[:, feat_ind]
+                elif channel_group == '2':
+                    # group 2
+                    feature_O = feature[:, feat_ind+channel_span*feat_num]
+
                 feature_A = np.array([])
                 for i in xrange(channel_num/channel_group_len):
                     # print i*feat_num+feat_ind, i*feat_num+feat_ind+channel_span*feat_num
 
-                    temp = np.concatenate(
-                        (feature[:, i*feat_num+feat_ind], feature[:, i*feat_num+feat_ind+channel_span*feat_num]),
-                        axis = None)
+                    if channel_group == '1&2':
+                        # group 1 and 2
+                        temp = np.concatenate(
+                            (feature[:, i*feat_num+feat_ind], feature[:, i*feat_num+feat_ind+channel_span*feat_num]),
+                            axis = None)
+                    elif channel_group == '1':
+                        # group 1
+                        temp = feature[:, i*feat_num+feat_ind]
+                    elif channel_group == '2':
+                        # group 2
+                        temp = feature[:, i*feat_num+feat_ind+channel_span*feat_num]
                     feature_A = np.concatenate( (feature_A, temp), axis=None )
                     # print feature_A.shape
                     # sys.exit(0)
@@ -150,14 +169,15 @@ def feature_stability_O2A():
 
                 ax.set_ylabel('Scores')
                 # ax.set_xlim(0,64)
-                ax.set_title(title + '_O2A_' + feature_name)
+                ax.set_title(subject + '_action_' + str(action) + '_group_' + channel_group + '_O2A_' + feature_name)
                 ax.set_xticks(ind + width / 2)
                 ax.set_xticklabels(xtickslabels_post)
                 # plt.show()
                 # if action == 1:
                 #     sys.exit(0)
                 plt.savefig('result/figure/stability/' +
-                            title + '_O2A_' + feature_name, dpi=120)
+                            subject + '_action_' + str(action) +  '_group_' + channel_group + '_O2A_' 
+                            + feature_name, dpi=120)
                 plt.close()
             
             bar_num = data_len
@@ -171,17 +191,20 @@ def feature_stability_O2A():
 
             ax.set_ylabel('Scores')
             # ax.set_xlim(0,64)
-            ax.set_title(title + '_O2A')
+            ax.set_title( subject + '_action_' + str(action) + '_group_' + channel_group + '_O2A')
             ax.set_xticks(ind + width / 2)
             ax.set_xticklabels(xtickslabels)
             # plt.show()
             plt.savefig('result/figure/stability/' +
-                        title + '_O2A', dpi=120)
+                        subject + '_action_' + str(action) + '_group_' + channel_group + '_O2A', dpi=120)
             plt.close()
             # if action == 1:
             #     sys.exit(0)
 
 if __name__ == '__main__':
-    # feature_stability_O2O()
-    feature_stability_O2A()
+    group_list = ['1&2', '1', '2']
+    # group_list = ['1']
+    for group in group_list:
+        feature_stability_O2O(group)
+        feature_stability_O2A(group)
 

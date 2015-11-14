@@ -11,10 +11,6 @@ from sklearn import preprocessing
 
 root_path = os.getcwd()
 
-def data_trainsform(data):
-    idx_S0 = np.array([17, 19, 45, 47]) - 1
-    print idx_S0
-    sys.exit(0)
 
 def load_raw_dataset(dir='data1', subject='subject_1'):
     ''' 姚传存师兄的数据集'''
@@ -23,22 +19,19 @@ def load_raw_dataset(dir='data1', subject='subject_1'):
     mat_file = dir_train + '/' + subject + '.mat'
 
     data = sio.loadmat(mat_file)
-    classes = data['motions']
-    class_idx = np.array([2,7,3,11,10,5,8]) - 1
-    times = data['times']
-    chan_num = data['channels']
-    trainingdata = data['data']
+    if dir == 'data1':
+        trainingdata = data['trainingdata']		# 提取mat文件中的原始信号数据
+    elif dir == 'data4':
+        trainingdata = data['data']
     trains = []
-    # print trainingdata[0][0]['emg'].shape, len(trainingdata[0][0])
-    # sys.exit(0)
-    
+
     for i in range(len(trainingdata)):
+        # len(trainingdata[i]) 表示训练动作的个数， data1中有15个动作， data4中有11个动作
         for j in range(len(trainingdata[i])):
-            # len(trainingdata[j]) 表示训练动作的个数，data4中有11个动作
-            trains.append(data_trainsform(trainingdata[i][j]['emg']))
-    trains = np.array(trains)
-    trains = trains[class_idx,:,:]
-    print trains.shape
+            if dir == 'data1':
+                trains.append(trainingdata[i][j]['trainingdata'])
+            elif dir == 'data4':
+                trains.append(trainingdata[i][j]['emg'])
     return trains
 
 
@@ -213,8 +206,6 @@ def data_preprocess(input_dir='data1', train_dir='train1', feature_type='TD4', s
     for sub in subject_list:
         print "----Running ", sub, '....................'
         trains = load_raw_dataset(input_dir, sub)
-        print len(trains), 
-        sys.exit(0)
         for i in range(len(trains)):                # 动作的数量
             feature_extract(trains[i], i + 1, winsize, incsize,     #提取第i个动作的特征
                             samrate, feature_type, train_dir, sub)
@@ -230,8 +221,8 @@ def data_normalize(trains):
 
 
 if __name__ == '__main__':
-    input_dir = 'data4'
-    train_dir = 'train4'
+    input_dir = 'data1'
+    train_dir = 'train1'
     feature_type = 'TD4'
     subject_list = ['subject_' + str(i) for i in range(1, 3)]
     data_preprocess(input_dir, train_dir, feature_type, subject_list)
