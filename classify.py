@@ -24,6 +24,7 @@ def train_dataset_feature_inter(
     my_clfs = ["LDA"]
 
     start_time = time.time()
+    channel_pos_list_shift = channel_pos_list[1:]
     for sub in subject_list:
         trains, classes = data_load.load_feature_dataset(train_dir, sub)
 
@@ -38,7 +39,7 @@ def train_dataset_feature_inter(
         
         trains_inter = trains[:, 0:chan_len]
         tests_inter = trains[:, chan_len:]
-        channel_pos_list = channel_pos_list[1:]
+        
         # print channel_pos_list
         # print trains_inter.shape, tests_inter.shape
         # sys.exit(0)
@@ -46,7 +47,7 @@ def train_dataset_feature_inter(
         classifier.training_lda_TD4_inter(
             my_clfs, trains_inter, tests_inter, classes,
             log_fold=fold_pre + '/' + type + '_' + dataset + '_' + sub + '_updated',
-            pos_list=channel_pos_list, num=1, chan_len=chan_num * feat_num)
+            pos_list=channel_pos_list_shift, num=1, chan_len=chan_num * feat_num)
         print "Total times: ", time.time() - start_time, 's'
 
 
