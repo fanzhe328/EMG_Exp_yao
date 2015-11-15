@@ -13,8 +13,37 @@ root_path = os.getcwd()
 
 def data_trainsform(data):
     idx_S0 = np.array([17, 19, 45, 47]) - 1
-    print idx_S0
-    sys.exit(0)
+    chan_num = len(idx_S0)
+    res = np.zeros( (data.shape[0], 36) )       # 4*9=36, 9表示电极位置的九种情况：原点，上1cm，上2cm，下1cm，下2cm...
+    
+    i = 0
+    res[:,i:i+chan_num] = data[:,idx_S0]        # S0
+    
+    i += chan_num
+    res[:,i:i+chan_num] = data[:,idx_S0-8]                  # 上1cm
+        
+    i += chan_num
+    res[:,i:i+chan_num] = data[:,idx_S0-[13,13,15,15]]      # 上2cm
+    
+    i += chan_num
+    res[:,i:i+chan_num] = data[:,idx_S0+7]                  # 下1cm
+    
+    i += chan_num
+    res[:,i:i+chan_num] = data[:,idx_S0+13]                 # 下2cm
+    
+    i += chan_num
+    res[:,i:i+chan_num] = data[:,idx_S0-1]                  # 左1cm
+    
+    i += chan_num
+    res[:,i:i+chan_num] = data[:,idx_S0-2]                  # 左2cm
+    
+    i += chan_num
+    res[:,i:i+chan_num] = data[:,idx_S0+1]                  # 右1cm
+    
+    i += chan_num
+    res[:,i:i+chan_num] = data[:,idx_S0+2]                  # 右2cm
+
+    return res
 
 def load_raw_dataset(dir='data1', subject='subject_1'):
     ''' 姚传存师兄的数据集'''
@@ -24,7 +53,7 @@ def load_raw_dataset(dir='data1', subject='subject_1'):
 
     data = sio.loadmat(mat_file)
     classes = data['motions']
-    class_idx = np.array([2,7,3,11,10,5,8]) - 1
+    class_idx = np.array([2,7,3,11,10,5,8]) - 1         # 选取七个动作，FPG，KG，FP，WF，WE，HC，NM
     times = data['times']
     chan_num = data['channels']
     trainingdata = data['data']
@@ -36,9 +65,11 @@ def load_raw_dataset(dir='data1', subject='subject_1'):
         for j in range(len(trainingdata[i])):
             # len(trainingdata[j]) 表示训练动作的个数，data4中有11个动作
             trains.append(data_trainsform(trainingdata[i][j]['emg']))
-    trains = np.array(trains)
-    trains = trains[class_idx,:,:]
-    print trains.shape
+            # trains.append(trainingdata[i][j]['emg'])
+    trains = np.array(trains[:])[class_idx,:,:]
+    # print trains.shape
+    # sys.exit(0)
+    # trains = trains[class_idx,:,:]
     return trains
 
 
@@ -213,8 +244,8 @@ def data_preprocess(input_dir='data1', train_dir='train1', feature_type='TD4', s
     for sub in subject_list:
         print "----Running ", sub, '....................'
         trains = load_raw_dataset(input_dir, sub)
-        print len(trains), 
-        sys.exit(0)
+        # print len(trains), 
+        # sys.exit(0)
         for i in range(len(trains)):                # 动作的数量
             feature_extract(trains[i], i + 1, winsize, incsize,     #提取第i个动作的特征
                             samrate, feature_type, train_dir, sub)
@@ -233,5 +264,12 @@ if __name__ == '__main__':
     input_dir = 'data4'
     train_dir = 'train4'
     feature_type = 'TD4'
-    subject_list = ['subject_' + str(i) for i in range(1, 3)]
-    data_preprocess(input_dir, train_dir, feature_type, subject_list)
+    subject_list = ['subject_' + str(i) for i in range(1, 6)]
+    # print subject_list
+    # sys.exit(0)
+    winsize = 250
+    incsize = 100
+    samrate=1024
+    train_dir = train_dir+'_'+str(winsize)+'_'+str(incsize)
+    data_preprocess(input_dir, train_dir, feature_type, subject_list,
+                    winsize, incsize, samrate)
