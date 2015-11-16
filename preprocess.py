@@ -244,13 +244,14 @@ def data_preprocess(input_dir='data1', train_dir='train1', feature_type='TD4', s
     for sub in subject_list:
         print "----Running ", sub, '....................'
         trains = load_raw_dataset(input_dir, sub)
-        # print len(trains), 
-        # sys.exit(0)
+
         for i in range(len(trains)):                # 动作的数量
             feature_extract(trains[i], i + 1, winsize, incsize,     #提取第i个动作的特征
                             samrate, feature_type, train_dir, sub)
             # generate_samples(trains[i], i+1, winsize, incsize, samrate)
+        
         generate_feature_dataset(train_dir, sub)
+
         # generate_signal_dataset(train_dir, sub)
     print "data_preprocess time elapsed: ", time.time() - start_time
 

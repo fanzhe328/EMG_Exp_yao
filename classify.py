@@ -47,7 +47,7 @@ def train_dataset_feature_inter(
         classifier.training_lda_TD4_inter(
             my_clfs, trains_inter, tests_inter, classes,
             log_fold=fold_pre + '/' + type + '_' + dataset + '_' + sub + '_updated',
-            pos_list=channel_pos_list_shift, num=1, chan_len=chan_num * feat_num)
+            pos_list=channel_pos_list_shift, num=1, chan_len=chan_len)
         print "Total times: ", time.time() - start_time, 's'
 
 
@@ -63,35 +63,19 @@ def train_dataset_feature_intra(
     start_time = time.time()
     for sub in subject_list:
         trains, classes = data_load.load_feature_dataset(train_dir, sub)
+        chan_num = 4                        # 通道个数，4通道
         if z_score:
             trains = data_normalize(trains)
             sub = 'norm_' + sub
-        if dataset == 'data1':
-            chan_span = 17          # 跨度
-        elif dataset == 'dataset4':
-            chan_span = 0           # 跨度,
         if type == 'TD4':
             feat_num = 4
-        chan_len = feat_num * chan_span
 
-        for idx, channel_pos in enumerate(channel_pos_list):
-            start = idx * feat_num
-            # print start, start+feat_num, start+chan_len,
-            # start+feat_num+chan_len
-            trains_intra = np.concatenate(
-                (trains[:, start: start + feat_num], trains[:,
-                                                            start + chan_len:start + chan_len + feat_num]),
-                axis=1)
-            # print trains_intra.shape
-            # if idx == 1 :
-            #     sys.exit(0)
-            # print 'Trains and classes: ', trains_intra.shape, classes.shape,
-            # idx * chan_len, idx * chan_len + chan_len
-            classifier.training_lda_TD4_intra(
-                my_clfs, trains, classes,
-                log_fold=fold_pre + '/' + type + '_' + dataset + '_' + sub + '_updated',
-                log_file_pos=channel_pos, num=1)
+        chan_len = feat_num * chan_num
 
+        classifier.training_lda_TD4_intra(
+            my_clfs, trains, classes,
+            log_fold=fold_pre + '/' + type + '_' + dataset + '_' + sub + '_updated',
+            pos_list=channel_pos_list, num=1, chan_len=chan_len)
 #
     # classifier.training_lda_TD4_cross(my_clfs, trains1, classes1, trains2, classes2, log_fold = 'TD4_data4_'+subject+'_1to2', num=1)
     # classifier.training_lda_TD4_cross(my_clfs, trains2, classes2, trains1, classes1, log_fold = 'TD4_data4_'+subject+'_2to1', num=1)
@@ -149,15 +133,15 @@ if __name__ == '__main__':
 
     z_scores = [True]
 
-    # for z_score in z_scores:
-    #     train_dataset_feature_intra(
-    #         train_dir, subject_list, feature_type,
-    #         input_dir, fold_pre, z_score, channel_pos_list)
-
     for z_score in z_scores:
-        train_dataset_feature_inter(
+        train_dataset_feature_intra(
             train_dir, subject_list, feature_type,
             input_dir, fold_pre, z_score, channel_pos_list)
+
+    # for z_score in z_scores:
+    #     train_dataset_feature_inter(
+    #         train_dir, subject_list, feature_type,
+    #         input_dir, fold_pre, z_score, channel_pos_list)
 
     # train_dataset_feature(train_dir, subject_list,
     #                       feature_type, input_dir, fold_pre, z_score)
