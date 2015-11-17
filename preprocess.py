@@ -112,7 +112,7 @@ def generate_signal_dataset(dir='train1', subject='subject_1'):
                targets, fmt="%s", delimiter=",")  # 保存数据
 
 
-def generate_feature_dataset(dir='train1', subject='subject_1'):
+def generate_feature_dataset(dir='train1', subject='subject_1', feature_type='TD4'):
     ''' 读取特征数据集，并生成特征数组和类别数组 '''
     print "----generate_feature_dataset, ", dir, subject
     dir_train = root_path + '/' + dir
@@ -122,20 +122,24 @@ def generate_feature_dataset(dir='train1', subject='subject_1'):
     # x = dis[3]
     # print x
     # print re.match(r'feature_class_(\d+)\.npy', x).group(1)
+    match_template = subject + '_feat_' + feature_type + '_action_(\d+)\.npy'
     diss = []
     for fi in dis:
-        if re.match(subject + '_feature_class_(\d+)\.npy', fi):
+        if re.match(match_template, fi):
             diss.append(fi)
+    
     diss.sort(key=lambda x: int(
-        re.match(subject + '_feature_class_(\d+)\.npy', x).group(1)))
+        re.match(match_template, x).group(1)))
     # dis.sort(key = lambda x:int(re.match('feature_class_(\d+)\.npy', x).group(1)))
     trains = np.array([])
     targets = np.array([], np.int)
     trains_ylim = 0
+    # print diss
+    # sys.exit(0)
     for fi in diss:
         data = np.load(fi)
         target_num = int(
-            re.match(subject + '_feature_class_(\d+)\.npy', fi).group(1))
+            re.match(match_template, fi).group(1))
         # target_num = (int)target_num
         # print type(target_num)
         if trains_ylim == 0:
@@ -146,11 +150,11 @@ def generate_feature_dataset(dir='train1', subject='subject_1'):
         targets = np.concatenate((targets, target_temp), axis=None)
     trains = trains.reshape((-1, trains_ylim))
     file_path = root_path + '/' + dir + '/' + subject
-    np.save(file_path + '_feature_trains.npy', trains)
-    np.save(file_path + '_feature_classes.npy', targets)
-    np.savetxt(file_path + '_feature_trains.csv',
+    np.save(file_path + '_feat_'+feature_type +'_trains.npy', trains)
+    np.save(file_path + '_feat_'+feature_type +'_classes.npy', targets)
+    np.savetxt(file_path + '_feat_'+feature_type +'_trains.csv',
                trains, fmt="%s", delimiter=",")  # 保存数据
-    np.savetxt(file_path + '_feature_classes.csv',
+    np.savetxt(file_path + '_feat_'+feature_type +'_classes.csv',
                targets, fmt="%s", delimiter=",")  # 保存数据
     print '----Save success, dir', dir, ', subject:', subject
     # print data.shape, target_temp.shape, target_num, target_temp[0]
@@ -194,7 +198,7 @@ def generate_samples(raw_data, target, window, overlap, sample_rate, subject="su
     print "generate_samples target ", target, " over, time elapsed:", time.time() - start_time
 
 
-def feature_extract(raw_data, target, window, overlap, sample_rate, feature_type='TD4', out_dir='train1', subject='subject_1'):
+def feature_extract(raw_data, target, window, overlap, sample_rate, feature_type='TD4', out_dir='train1', subject='subject_1', feat_num=4):
     ''' 生成数据样本集合（提取特征），参数：原始数据，类别，时间窗（250），重叠窗（100），采样率（1024）'''
     # print raw_data.shape, target, window, overlap
     print "----feature_extract target ", target, "...................."
@@ -205,7 +209,7 @@ def feature_extract(raw_data, target, window, overlap, sample_rate, feature_type
     # print winsize, incsize
 
     x_dim = (raw_data.shape[0] - winsize) / incsize + 1
-    y_dim = raw_data.shape[1] * 4
+    y_dim = raw_data.shape[1] * feat_num
 
     index = 0
     trains = np.zeros((x_dim, y_dim))
@@ -215,6 +219,9 @@ def feature_extract(raw_data, target, window, overlap, sample_rate, feature_type
             if feature_type == 'TD4':
                 cur_win_feature = fe.extract_TD4(
                     raw_data[start:start + winsize, i])		# 提取TD4（MAV，ZC，SSC，WL）四种时域特征
+            if feature_type == 'TD5':
+                cur_win_feature = fe.extract_TD5(
+                    raw_data[start:start + winsize, i])     # 提取TD4（MAV，ZC，SSC，WL）四种时域特征
             # elif feature_type:
             # cur_win_feature = fe.extract_TD4_AR(raw_data[start:start+winsize,
             # i])           # 提取TD4（MAV，ZC，SSC，WL）四种时域特征+AR特征
@@ -226,7 +233,7 @@ def feature_extract(raw_data, target, window, overlap, sample_rate, feature_type
         start += incsize
 
     log_file = root_path + '/' + out_dir + '/' + \
-        subject + '_feature_class_' + str(target)
+        subject + '_feat_' + feature_type + '_action_' + str(target)
 
     if(not new_fold(root_path + '/' + out_dir)):
         sys.exit(1)
@@ -236,7 +243,8 @@ def feature_extract(raw_data, target, window, overlap, sample_rate, feature_type
     print "----feature_extract target ", target, " over, time elapsed:", time.time() - start_time
 
 
-def data_preprocess(input_dir='data1', train_dir='train1', feature_type='TD4', subject_list=[1], winsize=250, incsize=100, samrate=1024):
+def data_preprocess(input_dir='data1', train_dir='train1', feature_type='TD4', 
+                        subject_list=[1], winsize=250, incsize=100, samrate=1024, feat_num=4):
     ''' 预处理，生成未标准化（Z-Score）的数据样本和类别 '''
     print "data_preprocess................."
     start_time = time.time()
@@ -247,11 +255,11 @@ def data_preprocess(input_dir='data1', train_dir='train1', feature_type='TD4', s
 
         for i in range(len(trains)):                # 动作的数量
             feature_extract(trains[i], i + 1, winsize, incsize,     #提取第i个动作的特征
-                            samrate, feature_type, train_dir, sub)
-            # generate_samples(trains[i], i+1, winsize, incsize, samrate)
+                            samrate, feature_type, train_dir, sub, feat_num)
+            ### generate_samples(trains[i], i+1, winsize, incsize, samrate)
         
-        generate_feature_dataset(train_dir, sub)
-
+        generate_feature_dataset(train_dir, sub, feature_type)
+        sys.exit(0)
         # generate_signal_dataset(train_dir, sub)
     print "data_preprocess time elapsed: ", time.time() - start_time
 
@@ -264,7 +272,13 @@ def data_normalize(trains):
 if __name__ == '__main__':
     input_dir = 'data4'
     train_dir = 'train4'
+    
     feature_type = 'TD4'
+    feat_num = 4
+    
+    # feature_type = 'TD5'
+    # feat_num = 5
+    
     subject_list = ['subject_' + str(i) for i in range(1, 6)]
     # print subject_list
     # sys.exit(0)
@@ -273,4 +287,8 @@ if __name__ == '__main__':
     samrate=1024
     train_dir = train_dir+'_'+str(winsize)+'_'+str(incsize)
     data_preprocess(input_dir, train_dir, feature_type, subject_list,
-                    winsize, incsize, samrate)
+                    winsize, incsize, samrate, feat_num)
+    print 'TD4 finished'
+    # feature_type = 'TD5'
+    # data_preprocess(input_dir, train_dir, feature_type, subject_list,
+    #                 winsize, incsize, samrate)

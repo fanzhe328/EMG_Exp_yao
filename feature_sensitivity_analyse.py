@@ -39,12 +39,12 @@ def feature_action_sensitivity():
     for subject in subjects:
         shift_simulation = np.ones((action_num,action_span,2))
         trains, classes = data_load.load_feature_dataset(train_dir, subject)
+        gaussion_distribute = np.ones( (len(actions), len(groups), len(feature_list), 2))
         for action in actions:
             trains_action = trains[classes == action]
             means = np.mean(trains_action, axis=0)
             stds = np.std(trains_action, axis=0)
-            # print means.shape
-            # sys.exit(0)
+            
             for group in groups:
                 for feat_idx, feat_name in enumerate(feature_list):
                     idx_S0 = (group-1)*feat_num+feat_idx
@@ -62,9 +62,9 @@ def feature_action_sensitivity():
                     # means_shift = abs(means[idx] - means[idx_S0])/means[idx_S0] \
                     #             + abs(stds[idx]-stds[idx_S0])/stds[idx_S0]
                     results.append([subject, str(action), feat_name, str(group), str(means_shift), str(std_shift)])
-                    
+                    gaussion_distribute[action-1, group-1, feat_idx,:] = [means_shift, std_shift]
                     # print subject, action, feat_name, group, means_shift[:]
-        log_result(results, root_path + '/result/sensitivity/'+subject+'_simulation_1', 2)       
+        log_result(gaussion_distribute, root_path + '/result/sensitivity/'+subject+'_simulation_1', 2)       
     log_result(results, root_path + '/result/sensitivity/feature_action_sensitivity_5', 2)
 
 def log_result(results, log_file, flag):
