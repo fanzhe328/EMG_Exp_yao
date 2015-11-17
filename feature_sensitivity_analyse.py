@@ -41,7 +41,7 @@ def feature_action_sensitivity(feature_type='TD4'):
 
     for subject in subjects:
         shift_simulation = np.ones((action_num,action_span,2))
-        trains, classes = data_load.load_feature_dataset(train_dir, subject)
+        trains, classes = data_load.load_feature_dataset(train_dir, subject, feature_type)
         gaussion_distribute = np.ones( (len(actions), len(groups), len(feature_list), 2))
         for action in actions:
             trains_action = trains[classes == action]
