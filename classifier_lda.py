@@ -81,7 +81,7 @@ def training_lda_TD4_inter(my_clfs, trains, trains_classes, tests, tests_classes
 
     chan_len = kw['chan_len']
 
-    print "----training TD4 inter, training by position O, testing by electrode shift ", 
+    print "----training "+kw['feature_type']+" inter, training by position O, testing by electrode shift ", 
 
     cv = 5
     results = []
@@ -98,7 +98,7 @@ def training_lda_TD4_inter(my_clfs, trains, trains_classes, tests, tests_classes
     
     scores = sklearn.cross_validation.cross_val_score(
         clf, trains, trains_classes, cv=cv)
-    results.append(['feat_TD4_cv_'+str(cv), 'lda(svd;tol=0.0001)', 'S0',
+    results.append(['feat_TD4_cv_'+str(cv), 'lda(svd;tol=0.0001)', 'S0_simu',
                     1, scores.mean(), scores.std()])
     
     kf = KFold(data_num, n_folds=cv)

@@ -259,7 +259,7 @@ def data_preprocess(input_dir='data1', train_dir='train1', feature_type='TD4',
             ### generate_samples(trains[i], i+1, winsize, incsize, samrate)
         
         generate_feature_dataset(train_dir, sub, feature_type)
-        sys.exit(0)
+        # sys.exit(0)
         # generate_signal_dataset(train_dir, sub)
     print "data_preprocess time elapsed: ", time.time() - start_time
 
@@ -273,11 +273,11 @@ if __name__ == '__main__':
     input_dir = 'data4'
     train_dir = 'train4'
     
-    feature_type = 'TD4'
-    feat_num = 4
+    # feature_type = 'TD4'
+    # feat_num = 4
     
-    # feature_type = 'TD5'
-    # feat_num = 5
+    feature_type = 'TD5'
+    feat_num = 5
     
     subject_list = ['subject_' + str(i) for i in range(1, 6)]
     # print subject_list

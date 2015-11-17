@@ -9,7 +9,7 @@ root_path = os.getcwd()
 
 from preprocess import load_raw_dataset
 
-def feature_action_sensitivity():
+def feature_action_sensitivity(feature_type='TD4'):
     ''' 对每个特征，分析其在不移位和移位情况下的差异性 '''
     results = []
     
@@ -22,7 +22,10 @@ def feature_action_sensitivity():
     actions = [i+1 for i in range(7)]
     action_num = len(actions)                        # 7 动作类型个数
 
-    feature_list = ['MAV', 'ZC', 'SSC', 'WL']
+    if feature_type == 'TD4':
+        feature_list = ['MAV', 'ZC', 'SSC', 'WL']
+    elif feature_type == 'TD5':
+        feature_list = ['MAV', 'ZC', 'SSC', 'WL','RMS']
     feat_num = len(feature_list)                    # 4 特征维度
 
     groups = [i+1 for i in range(4)]
@@ -74,4 +77,5 @@ def log_result(results, log_file, flag):
 
 
 if __name__ == '__main__':
-    feature_action_sensitivity()
+    feature_type = 'TD5'
+    feature_action_sensitivity(feature_type)

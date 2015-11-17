@@ -25,25 +25,27 @@ def train_dataset_feature_inter(
     my_clfs = ["LDA"]
 
     start_time = time.time()
-    channel_pos_list_shift = channel_pos_list[1:]
+    # channel_pos_list_shift = channel_pos_list[1:]
+    channel_pos_list_shift = channel_pos_list
     action_num = 7
     group_num = 4
+    if feature_type == 'TD4':
+        feat_num = 4                    # 特征维度 TD4:4 
+    elif feature_type == 'TD5':
+        feat_num = 5
+
+    chan_num = 4                        # 通道个数，4通道
+    chan_len = feat_num * chan_num             # 16
+
     for sub in subject_list:
         trains, classes = data_load.load_feature_dataset(train_dir, sub, feature_type)
 
-        chan_num = 4                        # 通道个数，4通道
-        if feature_type == 'TD4':
-            feat_num = 4                    # 特征维度 TD4:4 
-        if feature_type == 'TD5':
-            feat_num = 5
-        chan_len = feat_num * chan_num             # 16
         tests_inter = np.array([])
-        
         trains_inter = trains[:, 0:chan_len]
         trains_simu, classes_simu = guassion_simu(trains_inter, classes, sub, action_num, chan_num, feat_num)
         # trains_simu, classes_simu = trains_inter, classes
-        # sys.exit(0)
-        tests_inter = trains[:, chan_len:]
+
+        tests_inter = trains
         
         if z_score:
             trains_simu = data_normalize(trains_simu)
@@ -54,23 +56,19 @@ def train_dataset_feature_inter(
         # print trains_inter.shape, tests_inter.shape
         # sys.exit(0)
 # 
-        num = 11
+        # num = 2
 
         classifier_lda.training_lda_TD4_inter(
             my_clfs, trains_simu, classes_simu, tests_inter, classes,
-            log_fold=fold_pre + '/' + type + '_' + dataset + '_' + sub + '_simu1',
+            log_fold=fold_pre + '/' + feature_type + '_' + dataset + '_' + sub + '_simu1',
             pos_list=channel_pos_list_shift, chan_len=chan_len, group_num=group_num,
-            feature_type=feature_type,action_num=action_num)
+            feature_type=feature_type, action_num=action_num, num=num)
         print "Total times: ", time.time() - start_time, 's'
 
 
 def train_dataset_feature_intra(
         train_dir='train1', subject_list=['subject_1'], feature_type='TD4', dataset='data1',
         fold_pre='250_100', z_score=False, channel_pos_list=['O'], action_num=7, group_num=4):
-        # my_clfs = ["LDA", "SVC_linear", "SVC_rbf", "Logistic", "QDA", "GaussianNB"]
-        # my_clfs = ["LDA", "QDA", "GaussianNB", "SVC_linear", "SVC_rbf",
-        # "Logistic"]
-
     my_clfs = ["LDA"]
     start_time = time.time()
     for sub in subject_list:
@@ -91,9 +89,6 @@ def train_dataset_feature_intra(
             log_fold=fold_pre + '/' + feature_type + '_' + dataset + '_' + sub + '_simu1',
             pos_list=channel_pos_list, num=1, chan_len=chan_len,action_num=action_num,
             feature_type=feature_type,group_num=group_num)
-#
-    # classifier.training_lda_TD4_cross(my_clfs, trains1, classes1, trains2, classes2, log_fold = 'TD4_data4_'+subject+'_1to2', num=1)
-    # classifier.training_lda_TD4_cross(my_clfs, trains2, classes2, trains1, classes1, log_fold = 'TD4_data4_'+subject+'_2to1', num=1)
     print "Total times: ", time.time() - start_time, 's'
 
 
@@ -127,8 +122,10 @@ if __name__ == '__main__':
     incsize = 100
     samrate = 1024
     fold_pre = str(winsize) + '_' + str(incsize)
+    
     feature_type = 'TD4'
-
+    feature_type = 'TD5'
+    
     z_score = False
     action_num = 7
 
@@ -149,17 +146,17 @@ if __name__ == '__main__':
 
     z_scores = [True]
 
-    for z_score in z_scores:
-        train_dataset_feature_intra(
-            train_dir, subject_list, feature_type,
-            input_dir, fold_pre, z_score, 
-            channel_pos_list,action_num)
-
     # for z_score in z_scores:
-    #     train_dataset_feature_inter(
+    #     train_dataset_feature_intra(
     #         train_dir, subject_list, feature_type,
     #         input_dir, fold_pre, z_score, 
     #         channel_pos_list,action_num)
+
+    for z_score in z_scores:
+        train_dataset_feature_inter(
+            train_dir, subject_list, feature_type,
+            input_dir, fold_pre, z_score, 
+            channel_pos_list,action_num)
 
     # train_dataset_feature(train_dir, subject_list,
     #                       feature_type, input_dir, fold_pre, z_score)
