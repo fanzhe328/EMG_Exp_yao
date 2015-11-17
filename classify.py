@@ -56,7 +56,7 @@ def train_dataset_feature_inter(
         # print trains_inter.shape, tests_inter.shape
         # sys.exit(0)
 # 
-        # num = 2
+        num = 5
 
         classifier_lda.training_lda_TD4_inter(
             my_clfs, trains_simu, classes_simu, tests_inter, classes,
@@ -124,7 +124,7 @@ if __name__ == '__main__':
     fold_pre = str(winsize) + '_' + str(incsize)
     
     feature_type = 'TD4'
-    feature_type = 'TD5'
+    # feature_type = 'TD5'
     
     z_score = False
     action_num = 7
@@ -132,7 +132,7 @@ if __name__ == '__main__':
     train_dir = 'train4_' + fold_pre
     input_dir = 'data4'
     chan_num = 4
-    subject_list = ['subject_' + str(i) for i in range(1, 6)]
+    subject_list = ['subject_' + str(i) for i in range(1, 2)]
     # channel_pos_list = ['O',								# 中心位置
     #                     'A1', 'B1', 'C1', 'D1', 'E1', 'F1', 'G1', 'H1',		# 八方位 1cm 模拟：右，右下，下，左下，左，左上，上，右上
     #                     'A2', 'B2', 'C2', 'D2', 'E2', 'F2', 'G2', 'H2']		# 八方位 2cm 模拟：同上
