@@ -48,11 +48,11 @@ def guassion_simu(trains, targets, subject, action_num, chan_num, feat_num):
                     for f in range(feat_num):
                         # print means[f+c*feat_num], gd[action-1, c, f, 0],random.uniform(0,gd[action-1, c, f, 0]), gd[action-1, c, f, 1],random.uniform(-gd[action-1, c, f, 1], gd[action-1, c, f, 1])
                         # sys.exit(0)
-                        # trains_temp[i, f+c*feat_num] =\
-                        #     means[f+c*feat_num] + random.uniform(0,gd[action-1, c, f, 0])/2\
-                        #     + random.uniform(-gd[action-1, c, f, 1], gd[action-1, c, f, 1])
                         trains_temp[i, f+c*feat_num] =\
-                                np.random.normal(means[f+c*feat_num]+gd[action-1, c, f, 0]/2, gd[action-1, c, f, 1])
+                            means[f+c*feat_num] + random.uniform(0,gd[action-1, c, f, 0])/\
+                            + random.uniform(-gd[action-1, c, f, 1], gd[action-1, c, f, 1])
+                        # trains_temp[i, f+c*feat_num] =\
+                        #         np.random.normal(means[f+c*feat_num]+gd[action-1, c, f, 0]/2, gd[action-1, c, f, 1])
             trains_simu[start:start+temp_len,:] = trains_temp
 
         start += temp_len   

@@ -60,6 +60,10 @@ def training_lda_TD4_intra(my_clfs, trains, classes, **kw):
     test_rate_list = [0.2]
     data_num = trains.shape[0]/kw['action_num']
 
+    scores = sklearn.cross_validation.cross_val_score(clf, trains, classes, cv=cv)
+    results.append(['feat_TD4_cv_'+str(cv), 'lda(svd;tol=0.0001)', 'ALL',
+                         scores.mean(), scores.std()])
+    
     for idx, channel_pos in enumerate(kw['pos_list']):
         print '----training TD4 intra, channel_pos: ', channel_pos,'......'
         trains_intra = trains[:,idx*chan_len: idx*chan_len+chan_len]

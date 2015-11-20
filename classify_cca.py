@@ -10,9 +10,10 @@ import os
 import sys
 import time
 import data_load
-import classifier_lda
+import classifier_lda_cca
 from preprocess import data_preprocess, data_normalize
-from noise_simulation import guassion_simu
+
+# from noise_simulation import guassion_simu
 # from data_plot import plot_result
 
 
@@ -25,44 +26,45 @@ def train_dataset_feature_inter(
     my_clfs = ["LDA"]
 
     start_time = time.time()
-    # channel_pos_list_shift = channel_pos_list[1:]
-    channel_pos_list_shift = channel_pos_list
-    action_num = 7
+
+    channel_pos_list_shift = channel_pos_list[1:]
+
     group_num = 4
     if feature_type == 'TD4':
-        feat_num = 4                    # 特征维度 TD4:4 
+        feat_num = 4                    # 特征维度 TD4:4
     elif feature_type == 'TD5':
         feat_num = 5
 
     chan_num = 4                        # 通道个数，4通道
     chan_len = feat_num * chan_num             # 16
 
-    for sub in subject_list:
-        trains, classes = data_load.load_feature_dataset(train_dir, sub, feature_type)
+    for sub in subject_list[1:]:
+        trains, classes = data_load.load_feature_dataset(
+            train_dir, sub, feature_type)
 
-        tests_inter = np.array([])
-        trains_inter = trains[:, 0:chan_len]
-        trains_simu, classes_simu = guassion_simu(trains_inter, classes, sub, action_num, chan_num, feat_num)
-        # trains_simu, classes_simu = trains_inter, classes
-
-        tests_inter = trains
+        # tests_inter = np.array([])
         
         if z_score:
-            trains_simu = data_normalize(trains_simu)
-            tests_inter = data_normalize(tests_inter)
-            sub = 'norm_' + sub
+            trains = data_normalize(trains)
+            subject = 'norm_' + sub
 
-        # print channel_pos_list
-        # print trains_inter.shape, tests_inter.shape
+        trains_S0 = trains[:, 0:chan_len]
+        trains_shift = trains[:, chan_len:]
+        # print trains_S0.shape, trains_shift.shape, trains.shape
         # sys.exit(0)
-# 
-        num = 3
+        # trains_other = trains
 
-        classifier_lda.training_lda_TD4_inter(
-            my_clfs, trains_simu, classes_simu, tests_inter, classes,
-            log_fold=fold_pre + '/' + feature_type + '_' + dataset + '_' + sub + '_simu1',
+        num = 1
+
+        # classifier_lda_cca.generate_transform_equations(
+        #     trains_S0, trains_shift, pos_list=channel_pos_list_shift, chan_len=chan_len, subject=sub)
+
+        classifier_lda_cca.training_lda_TD4_inter(
+            my_clfs, trains_S0, trains_shift, classes,
+            log_fold=fold_pre + '/' + feature_type + '_' + dataset + '_' + sub + '_cca_1',
             pos_list=channel_pos_list_shift, chan_len=chan_len, group_num=group_num,
-            feature_type=feature_type, action_num=action_num, num=num)
+        feature_type=feature_type, action_num=action_num, num=num,
+        subject=sub)
         print "Total times: ", time.time() - start_time, 's'
 
 
@@ -72,7 +74,8 @@ def train_dataset_feature_intra(
     my_clfs = ["LDA"]
     start_time = time.time()
     for sub in subject_list:
-        trains, classes = data_load.load_feature_dataset(train_dir, sub, feature_type)
+        trains, classes = data_load.load_feature_dataset(
+            train_dir, sub, feature_type)
         chan_num = 4                        # 通道个数，4通道
         if z_score:
             trains = data_normalize(trains)
@@ -84,33 +87,11 @@ def train_dataset_feature_intra(
 
         chan_len = feat_num * chan_num
 
-        classifier_lda.training_lda_TD4_intra(
+        classifier_lda_cca.training_lda_TD4_intra(
             my_clfs, trains, classes,
-            log_fold=fold_pre + '/' + feature_type + '_' + dataset + '_' + sub + '_simu1',
-            pos_list=channel_pos_list, num=1, chan_len=chan_len,action_num=action_num,
-            feature_type=feature_type,group_num=group_num)
-    print "Total times: ", time.time() - start_time, 's'
-
-
-def train_dataset_signal():
-    my_clfs = ["LDA"]
-    # subject = 'subject_1'
-    subject_list = ['subject_' + str(i) for i in range(1, 2)]
-    # trains, classes = load_feature_dataset('train1', 'subject_1', feature_type)
-
-    # trains1, classes1, trains2, classes2 = load_feature_dataset('train4', subject)
-    # print trains.shape, classes.shape
-
-    start_time = time.time()
-
-    for sub in subject_list:
-        trains, classes = load_signal_dataset('train1', sub)
-        print trains.shape, classes.shape
-        classifier.training_lda_signal(
-            my_clfs, trains, classes, log_fold='signal_data1_' + sub, num=1)
-
-    # classifier.training_lda_TD4_cross(my_clfs, trains1, classes1, trains2, classes2, log_fold = 'TD4_data4_'+subject+'_1to2', num=1)
-    # classifier.training_lda_TD4_cross(my_clfs, trains2, classes2, trains1, classes1, log_fold = 'TD4_data4_'+subject+'_2to1', num=1)
+            log_fold=fold_pre + '/' + feature_type + '_' + dataset + '_' + sub + '_cca_1',
+            pos_list=channel_pos_list, num=1, chan_len=chan_len, action_num=action_num,
+            feature_type=feature_type, group_num=group_num)
     print "Total times: ", time.time() - start_time, 's'
 
 
@@ -122,10 +103,10 @@ if __name__ == '__main__':
     incsize = 100
     samrate = 1024
     fold_pre = str(winsize) + '_' + str(incsize)
-    
+
     feature_type = 'TD4'
     # feature_type = 'TD5'
-    
+
     z_score = False
     action_num = 7
 
@@ -149,14 +130,14 @@ if __name__ == '__main__':
     # for z_score in z_scores:
     #     train_dataset_feature_intra(
     #         train_dir, subject_list, feature_type,
-    #         input_dir, fold_pre, z_score, 
+    #         input_dir, fold_pre, z_score,
     #         channel_pos_list,action_num)
 
     for z_score in z_scores:
         train_dataset_feature_inter(
             train_dir, subject_list, feature_type,
-            input_dir, fold_pre, z_score, 
-            channel_pos_list,action_num)
+            input_dir, fold_pre, z_score,
+            channel_pos_list, action_num)
 
     # train_dataset_feature(train_dir, subject_list,
     #                       feature_type, input_dir, fold_pre, z_score)
