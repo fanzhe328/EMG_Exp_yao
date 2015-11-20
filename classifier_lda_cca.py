@@ -93,12 +93,13 @@ def training_lda_TD4_intra(my_clfs, trains, classes, **kw):
     for idx, channel_pos in enumerate(kw['pos_list']):
         print '----training TD4 intra combination, channel_pos: ', channel_pos,'......'
         trains_intra_shift = trains[:,idx*chan_len: idx*chan_len+chan_len]
-        trains_intra = np.concatenate( (trains_intra_S0, trains_intra_shift), axis=1 )
-        # print trains_intra_shift.shape, trains_intra.shape
+        trains_intra = np.concatenate( (trains_intra_S0, trains_intra_shift), axis=0 )
+        classes_intra = np.concatenate( (classes, classes), axis=0)
+        # print trains_intra_shift.shape, trains_intra.shape, classes_intra.shape
         # sys.exit(0)
         scores = sklearn.cross_validation.cross_val_score(
-            clf, trains_intra, classes, cv=cv)
-        results.append(['feat_TD4_cv_'+str(cv), 'lda', channel_pos,
+            clf, trains_intra, classes_intra, cv=cv)
+        results.append(['feat_TD4_cv_'+str(cv), 'lda', channel_pos+'combine S0',
                          scores.mean(), scores.std()])
 
     log_result(results, log_fold + '/' + log_file + '_' + str(kw['num']), 2)
@@ -181,7 +182,7 @@ def training_lda_TD4_inter(my_clfs, trains_S0, trains_shift, classes, **kw):
             if channel_pos != 'S0':
 
                 # plsca = joblib.load(transform_fold+'/cca_transform_'+kw['subject']+'_'+channel_pos+'.model')
-                plsca = PLSCanonical(n_components=12)
+                plsca = PLSCanonical(n_components=14)
                 # print X_test.shape, X_train.shape
                 # sys.exit(0)
                 plsca.fit(X_test[train_idx], X_train)

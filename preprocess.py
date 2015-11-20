@@ -273,8 +273,8 @@ if __name__ == '__main__':
     input_dir = 'data4'
     train_dir = 'train4'
     
-    # feature_type = 'TD4'
-    # feat_num = 4
+    feature_type = 'TD4'
+    feat_num = 4
     
     feature_type = 'TD5'
     feat_num = 5

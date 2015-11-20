@@ -56,8 +56,8 @@ def train_dataset_feature_inter(
 
         num = 1
 
-        # classifier_lda_cca.generate_transform_equations(
-        #     trains_S0, trains_shift, pos_list=channel_pos_list_shift, chan_len=chan_len, subject=sub)
+        classifier_lda_cca.generate_transform_equations(
+            trains_S0, trains_shift, pos_list=channel_pos_list_shift, chan_len=chan_len, subject=sub)
 
         classifier_lda_cca.training_lda_TD4_inter(
             my_clfs, trains_S0, trains_shift, classes,
