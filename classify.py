@@ -146,17 +146,17 @@ if __name__ == '__main__':
 
     z_scores = [True]
 
-    # for z_score in z_scores:
-    #     train_dataset_feature_intra(
-    #         train_dir, subject_list, feature_type,
-    #         input_dir, fold_pre, z_score, 
-    #         channel_pos_list,action_num)
-
     for z_score in z_scores:
-        train_dataset_feature_inter(
+        train_dataset_feature_intra(
             train_dir, subject_list, feature_type,
             input_dir, fold_pre, z_score, 
             channel_pos_list,action_num)
+
+    # for z_score in z_scores:
+    #     train_dataset_feature_inter(
+    #         train_dir, subject_list, feature_type,
+    #         input_dir, fold_pre, z_score, 
+    #         channel_pos_list,action_num)
 
     # train_dataset_feature(train_dir, subject_list,
     #                       feature_type, input_dir, fold_pre, z_score)

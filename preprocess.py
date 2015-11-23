@@ -53,10 +53,17 @@ def load_raw_dataset(dir='data1', subject='subject_1'):
 
     data = sio.loadmat(mat_file)
     classes = data['motions']
-    class_idx = np.array([2,7,3,11,10,5,8]) - 1         # 选取七个动作，FPG，KG，FP，WF，WE，HC，NM
+
+    # 选取7个动作，FPG，KG，FP，WF，WE，HC，NM
+    # class_idx = np.array([2,7,3,11,10,5,8]) - 1         
+    
+    # 选取11个动作，FPG，KG，FP，WF，WE，HC，NM, CG, FS, HO, TG
+    class_idx = np.array([2,7,3,11,10,5,8,1,4,6,9]) - 1
+
     times = data['times']
     chan_num = data['channels']
     trainingdata = data['data']
+
     trains = []
     # print trainingdata[0][0]['emg'].shape, len(trainingdata[0][0])
     # sys.exit(0)

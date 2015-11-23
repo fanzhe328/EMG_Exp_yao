@@ -60,12 +60,11 @@ def training_lda_TD4_intra(my_clfs, trains, classes, **kw):
     data_num = trains.shape[0]/kw['action_num']
 
     scores = sklearn.cross_validation.cross_val_score(clf, trains, classes, cv=cv)
-    results.append(['feat_TD4_cv_'+str(cv), 'lda', 'ALL',
-                         scores.mean(), scores.std()])
+    results.append(['feat_TD4_cv_'+str(cv), 'lda', 'ALL', scores.mean(), scores.std()])
     
 
     # PLS CCA
-    plsca = PLSCanonical(n_components=12)
+    plsca = PLSCanonical(n_components=15)
     for idx, channel_pos in enumerate(kw['pos_list']):
         print '----training TD4 intra CCA based, channel_pos: ', channel_pos,'......'
         if channel_pos == 'S0':
@@ -78,8 +77,7 @@ def training_lda_TD4_intra(my_clfs, trains, classes, **kw):
 
             scores = sklearn.cross_validation.cross_val_score(
                 clf, trains_intra, classes, cv=cv)
-            results.append(['feat_TD4_cv_'+str(cv), 'lda_cca', 'S0+'+channel_pos,
-                         scores.mean(), scores.std()])
+            results.append(['feat_TD4_cv_'+str(cv), 'lda_cca', 'S0+'+channel_pos, scores.mean(), scores.std()])
 
     for idx, channel_pos in enumerate(kw['pos_list']):
         print '----training TD4 intra , channel_pos: ', channel_pos,'......'
@@ -99,9 +97,9 @@ def training_lda_TD4_intra(my_clfs, trains, classes, **kw):
         # sys.exit(0)
         scores = sklearn.cross_validation.cross_val_score(
             clf, trains_intra, classes_intra, cv=cv)
-        results.append(['feat_TD4_cv_'+str(cv), 'lda', channel_pos+'combine S0',
-                         scores.mean(), scores.std()])
-
+        results.append(['feat_TD4_cv_'+str(cv), 'lda', channel_pos+' combine S0', scores.mean(), scores.std()])
+    # print results
+    # sys.exit(0)
     log_result(results, log_fold + '/' + log_file + '_' + str(kw['num']), 2)
     print '----Log Fold:', log_fold, ', log_file: ', log_file + '_' + str(kw['num'])
     print '----training TD4 time elapsed:', time.time() - start_time

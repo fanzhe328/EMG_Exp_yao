@@ -108,7 +108,7 @@ if __name__ == '__main__':
     # feature_type = 'TD5'
 
     z_score = False
-    action_num = 7
+    action_num = 11
 
     train_dir = 'train4_' + fold_pre
     input_dir = 'data4'
@@ -127,17 +127,17 @@ if __name__ == '__main__':
 
     z_scores = [True]
 
-    # for z_score in z_scores:
-    #     train_dataset_feature_intra(
-    #         train_dir, subject_list, feature_type,
-    #         input_dir, fold_pre, z_score,
-    #         channel_pos_list,action_num)
-
     for z_score in z_scores:
-        train_dataset_feature_inter(
+        train_dataset_feature_intra(
             train_dir, subject_list, feature_type,
             input_dir, fold_pre, z_score,
-            channel_pos_list, action_num)
+            channel_pos_list,action_num)
+
+    # for z_score in z_scores:
+    #     train_dataset_feature_inter(
+    #         train_dir, subject_list, feature_type,
+    #         input_dir, fold_pre, z_score,
+    #         channel_pos_list, action_num)
 
     # train_dataset_feature(train_dir, subject_list,
     #                       feature_type, input_dir, fold_pre, z_score)

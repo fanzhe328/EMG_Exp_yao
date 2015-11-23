@@ -12,7 +12,7 @@ def feature_action_sensitivity(feature_type='TD4'):
     ''' 对每个特征，分析其在不移位和移位情况下的协方差 '''
     results = []
     
-    subjects = ['subject_' + str(i + 1) for i in range(5)]
+    subjects = ['subject_' + str(i + 1) for i in range(1)]
 
     channel_pos_list = ['S0',                                             # 中心位置
                         'U1', 'U2', 'D1', 'D2', 'L1', 'L2', 'R1', 'R2']  # 上 下 左 右
@@ -39,7 +39,7 @@ def feature_action_sensitivity(feature_type='TD4'):
 
     results.append(['subject', 'action', 'feature', 'group', 'means_shift', 'std_shift'] )
     plsca = PLSCanonical(n_components=2)
-    pos = 1
+    # pos = 1
     k=0
     for pos_idx, pos_name in enumerate(channel_pos_list[1:]):
         pos = pos_idx+1
@@ -50,29 +50,32 @@ def feature_action_sensitivity(feature_type='TD4'):
             # print trains.shape, classes.shape, m
             # print group_span, group_span*2
             # sys.exit(0)
-            if subject == "subject_1":
-                X_train = trains[:, group_span*pos: group_span*(pos+1)]
-                Y_train = trains[:, :group_span]
-                # plsca = PLSCanonical(n_components=2)
-                plsca.fit(X_train, Y_train)
+            m = trains.shape[0]*2/3
+            X_train = trains[:m, group_span*pos: group_span*(pos+1)]
+            Y_train = trains[:m:, :group_span]
+            X_test = trains[m:, group_span*pos: group_span*(pos+1)]
+            Y_test = trains[m:, :group_span]
 
-            elif subject != "subject_1":
-                X_test = trains[:, group_span*pos: group_span*(pos+1)]
-                Y_test = trains[:, :group_span]
-                # print X_train.shape, Y_train.shape, X_test.shape, Y_test.shape
-                # sys.exit(0)
+            plsca.fit(X_train, Y_train)
+            X_train_r, Y_train_r = plsca.transform(X_train, Y_train)
+            X_test_r, Y_test_r = plsca.transform(X_test, Y_test)
 
-                X_train_r, Y_train_r = plsca.transform(X_train, Y_train)
-                # X_test_r, Y_test_r = plsca.transform(X_test, Y_test)
-                X_test_r, Y_test_r = plsca.transform(X_test, Y_test)
-                # print 'transform S0+shift', X_test_r
-                # X_test_r = plsca.transform(X_test)
-                # print 'transform shift', X_test_r
-                # X_test_r = plsca.transform(Y_test)
-                # print 'transform S0', X_test_r
-                filename='train_subject_1_test_'+subject+'_'+pos_name
-                # plot_plsc_figure(X_train_r,Y_train_r,X_test_r, Y_test_r, filename)
-                # sys.exit(0)
+            filename=subject+'_'+pos_name
+            # plot_plsc_figure(X_train_r,Y_train_r,X_test_r, Y_test_r, filename)
+            plot_plsc_figure_two(X_train_r,Y_train_r,X_test_r, Y_test_r, filename)
+            # if subject == "subject_1":
+            #     X_train = trains[:, group_span*pos: group_span*(pos+1)]
+            #     Y_train = trains[:, :group_span]
+            #     plsca.fit(X_train, Y_train)
+
+            # elif subject != "subject_1":
+            #     X_test = trains[:, group_span*pos: group_span*(pos+1)]
+            #     Y_test = trains[:, :group_span]
+
+            #     X_train_r, Y_train_r = plsca.transform(X_train, Y_train)
+            #     X_test_r, Y_test_r = plsca.transform(X_test, Y_test)
+            #     filename='train_subject_1_test_'+subject+'_'+pos_name
+            #     plot_plsc_figure(X_train_r,Y_train_r,X_test_r, Y_test_r, filename)
 
 def plot_plsc_figure(X_train_r,Y_train_r,X_test_r, Y_test_r, filename):
     plt.figure(figsize=(12, 8))
@@ -81,7 +84,7 @@ def plot_plsc_figure(X_train_r,Y_train_r,X_test_r, Y_test_r, filename):
     plt.plot(X_test_r[:, 0], Y_test_r[:, 0], "or", label="test")
     plt.xlabel("x scores")
     plt.ylabel("y scores")
-    plt.title('Comp. 1: X vs Y (test corr = %.2f)' %
+    plt.title('Dimensino 1: X vs Y (test corr = %.2f)' %
               np.corrcoef(X_test_r[:, 0], Y_test_r[:, 0])[0, 1])
     plt.xticks(())
     plt.yticks(())
@@ -125,6 +128,32 @@ def plot_plsc_figure(X_train_r,Y_train_r,X_test_r, Y_test_r, filename):
     plt.close()
     # plt.show()
 
+def plot_plsc_figure_two(X_train_r,Y_train_r,X_test_r, Y_test_r, filename):
+    plt.figure(figsize=(12, 4))
+    plt.subplot(121)
+    plt.plot(X_train_r[:, 0], Y_train_r[:, 0], "ob", label="train")
+    plt.plot(X_test_r[:, 0], Y_test_r[:, 0], "or", label="test")
+    plt.xlabel("x scores")
+    plt.ylabel("y scores")
+    plt.title('Dimensino 1: X vs Y (test corr = %.2f)' %
+              np.corrcoef(X_test_r[:, 0], Y_test_r[:, 0])[0, 1])
+    plt.xticks(())
+    plt.yticks(())
+    plt.legend(loc="best")
+
+    plt.subplot(122)
+    plt.plot(X_train_r[:, 1], Y_train_r[:, 1], "ob", label="train")
+    plt.plot(X_test_r[:, 1], Y_test_r[:, 1], "or", label="test")
+    plt.xlabel("x scores")
+    plt.ylabel("y scores")
+    plt.title('Comp. 2: X vs Y (test corr = %.2f)' %
+              np.corrcoef(X_test_r[:, 1], Y_test_r[:, 1])[0, 1])
+    plt.xticks(())
+    plt.yticks(())
+    plt.legend(loc="best")
+
+    plt.savefig(root_path + "/result/figure/cca/" + filename + "_two.png")
+    plt.close()
 
 def log_result(results, log_file, flag):
     np.save(log_file + '.npy', results)
@@ -133,5 +162,6 @@ def log_result(results, log_file, flag):
 
 
 if __name__ == '__main__':
+
     feature_type = 'TD4'
     feature_action_sensitivity(feature_type)
