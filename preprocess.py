@@ -47,7 +47,7 @@ def data_trainsform(data):
 
 def load_raw_dataset(dir='data1', subject='subject_1', action_num=11):
     ''' 姚传存师兄的数据集'''
-    dir_train = root_path + '/' + dir
+    dir_train = root_path + '/../' + dir
     # 原始文件名称，已经截取动作片， dir表示实验组名称，subject表示受试者
     mat_file = dir_train + '/' + subject + '.mat'
 
@@ -68,8 +68,6 @@ def load_raw_dataset(dir='data1', subject='subject_1', action_num=11):
     trainingdata = data['data']
 
     trains = []
-    # print trainingdata[0][0]['emg'].shape, len(trainingdata[0][0])
-    # sys.exit(0)
     
     for i in range(len(trainingdata)):
         for j in range(len(trainingdata[i])):
@@ -77,50 +75,8 @@ def load_raw_dataset(dir='data1', subject='subject_1', action_num=11):
             trains.append(data_trainsform(trainingdata[i][j]['emg']))
             # trains.append(trainingdata[i][j]['emg'])
     trains = np.array(trains[:])[class_idx,:,:]
-    # print trains.shape
-    # sys.exit(0)
-    # trains = trains[class_idx,:,:]
+
     return trains
-
-
-def generate_signal_dataset(dir='train1', subject='subject_1'):
-    ''' 读取信号数据集，并生成信号数组和类别数组 '''
-    print "----generate_signal_dataset, ", dir, subject
-    dir_train = root_path + '/' + dir
-    dis = os.listdir(dir_train)
-    os.chdir(dir_train)
-
-    diss = []
-    for fi in dis:
-        if re.match(subject + '_signal_class_(\d+)\.npy', fi):
-            diss.append(fi)
-    diss.sort(key=lambda x: int(
-        re.match(subject + '_signal_class_(\d+)\.npy', x).group(1)))
-
-    trains = np.array([])
-    targets = np.array([], np.int)
-    trains_ylim = 0
-    for fi in diss:
-        data = np.load(fi)
-        print 'fi:', fi, ' :', data.shape
-        target_num = int(
-            re.match(subject + '_signal_class_(\d+)\.npy', fi).group(1))
-        if trains_ylim == 0:
-            trains_ylim = data.shape[1]
-        target_temp = np.ones((data.shape[0],), np.int)
-        np.multiply(target_temp, target_num, target_temp)
-        trains = np.concatenate((trains, data), axis=None)
-        targets = np.concatenate((targets, target_temp), axis=None)
-    print type(targets)
-    trains = trains.reshape((-1, trains_ylim))
-    file_path = root_path + '/' + dir + '/' + subject
-    np.save(file_path + '_signal_trains.npy', trains)
-    np.save(file_path + '_signal_classes.npy', targets)
-    np.savetxt(file_path + '_signal_trains.csv',
-               trains, fmt="%s", delimiter=",")  # 保存数据
-    np.savetxt(file_path + '_signal_classes.csv',
-               targets, fmt="%s", delimiter=",")  # 保存数据
-
 
 def generate_feature_dataset(dir='train1', subject='subject_1', feature_type='TD4', action_num=11):
     ''' 读取特征数据集，并生成特征数组和类别数组 '''
@@ -129,9 +85,6 @@ def generate_feature_dataset(dir='train1', subject='subject_1', feature_type='TD
     dis = os.listdir(dir_train)
     os.chdir(dir_train)
 
-    # x = dis[3]
-    # print x
-    # print re.match(r'feature_class_(\d+)\.npy', x).group(1)
     match_template = subject + '_feat_' + feature_type + '_action_(\d+)\.npy'
     diss = []
     for fi in dis:
@@ -177,39 +130,6 @@ def generate_feature_dataset(dir='train1', subject='subject_1', feature_type='TD
     # 	trains.append(data)
 
 
-def generate_samples(raw_data, target, window, overlap, sample_rate, subject="subject_1", out_dir='train1'):
-    ''' 生成数据样本集合（不提取特征），参数：原始数据，类别，时间窗（250），重叠窗（100），采样率（1024）'''
-    # 原始数据，每一行为一个时间点下所有通道的值，每一列为一个通道在一段时间的信号量变化
-    # print raw_data.shape, target, window, overlap
-    print "generate_samples target ", target, " ...................."
-    start_time = time.time()
-    winsize = (int)(sample_rate * window * 0.001) 		# 每个时间窗中含有的数据点的数量
-    incsize = (int)(sample_rate * overlap * 0.001) 		# 每个重叠时间窗中含有的数据点的数量
-    start = 0
-    # print winsize, incsize
-
-    x_dim = (raw_data.shape[0] - winsize) / incsize + 1		# 矩阵的行数
-    y_dim = raw_data.shape[1] * winsize					# 矩阵的列数
-
-    index = 0
-    trains = np.zeros((x_dim, y_dim))					# 最终生成的训练数据（信号层次）
-    # print trains.shape, trains.dtype
-    while start + winsize < raw_data.shape[0]:
-        train = np.array([])
-        for i in range(raw_data.shape[1]):				# 读取每个通道的数据
-            cur_win_signal = raw_data[start:start + winsize, i]
-            train = np.concatenate(
-                (train, cur_win_signal), axis=None)  # 将一个时间窗内的所有通道的数据组合
-        # print train.shape
-        trains[index] = train
-        index += 1
-        start += incsize
-
-    log_file = root_path + '/' + out_dir + '/' + \
-        subject + '_signal_class_' + str(target)
-    np.save(log_file + '.npy', trains)								# 保存数据
-    np.savetxt(log_file + '.csv', trains, fmt="%s", delimiter=",")  # 保存数据
-    print "generate_samples target ", target, " over, time elapsed:", time.time() - start_time
 
 
 def feature_extract(raw_data, target, window, overlap, sample_rate, feature_type='TD4', out_dir='train1', subject='subject_1', feat_num=4):
@@ -253,7 +173,7 @@ def feature_extract(raw_data, target, window, overlap, sample_rate, feature_type
         sys.exit(1)
 
     np.save(log_file + '.npy', trains)
-    np.savetxt(log_file + '.csv', trains, fmt="%s", delimiter=",")
+    # np.savetxt(log_file + '.csv', trains, fmt="%s", delimiter=",")
     print "----feature_extract target ", target, " over, time elapsed:", time.time() - start_time
 
 
@@ -265,18 +185,17 @@ def data_preprocess(input_dir='data1', train_dir='train1', feature_type='TD4', s
 
     for sub in subject_list:
         print "----Running ", sub, '....................'
-        trains = load_raw_dataset(input_dir, sub, action_num)
-
+        # 加载原始数据
+        # trains = load_raw_dataset(input_dir, sub, action_num)
+        # # 提取特征
         # for i in range(len(trains)):                # 动作的数量
         #     feature_extract(trains[i], i + 1, winsize, incsize,     #提取第i个动作的特征
         #                     samrate, feature_type, train_dir, sub, feat_num)
-            ### generate_samples(trains[i], i+1, winsize, incsize, samrate)
         
+        # 生成特征文件
         generate_feature_dataset(train_dir, sub, feature_type, action_num)
-        # sys.exit(0)
-        # generate_signal_dataset(train_dir, sub)
-    print "data_preprocess time elapsed: ", time.time() - start_time
 
+    print "data_preprocess time elapsed: ", time.time() - start_time
 
 def data_normalize(trains):
     trains_scale = preprocessing.scale(trains)
@@ -287,23 +206,102 @@ if __name__ == '__main__':
     input_dir = 'data4'
     train_dir = 'train4'
     
-    feature_type = 'TD4'
-    feat_num = 4
-    action_num = 9
-
+    # feature_type = 'TD4'
+    # feat_num = 4
+    actions = [7, 9, 11]
+    # action_num = 11
     # feature_type = 'TD5'
     # feat_num = 5
-    
+
+    feature_types = [('TD4', 4), ('TD5', 5)]
     subject_list = ['subject_' + str(i) for i in range(1, 6)]
-    # print subject_list
-    # sys.exit(0)
+
     winsize = 250
     incsize = 100
     samrate=1024
     train_dir = train_dir+'_'+str(winsize)+'_'+str(incsize)
-    data_preprocess(input_dir, train_dir, feature_type, subject_list,
-                    winsize, incsize, samrate, feat_num, action_num)
-    print 'TD4 finished'
-    # feature_type = 'TD5'
-    # data_preprocess(input_dir, train_dir, feature_type, subject_list,
-    #                 winsize, incsize, samrate)
+
+    for feature_type, feat_num in feature_types:
+        for action_num in actions:
+            data_preprocess(input_dir, train_dir, feature_type, subject_list,
+                            winsize, incsize, samrate, feat_num, action_num)
+
+
+
+
+
+
+
+
+# def generate_samples(raw_data, target, window, overlap, sample_rate, subject="subject_1", out_dir='train1'):
+#     ''' 生成数据样本集合（不提取特征），参数：原始数据，类别，时间窗（250），重叠窗（100），采样率（1024）'''
+#     # 原始数据，每一行为一个时间点下所有通道的值，每一列为一个通道在一段时间的信号量变化
+#     # print raw_data.shape, target, window, overlap
+#     print "generate_samples target ", target, " ...................."
+#     start_time = time.time()
+#     winsize = (int)(sample_rate * window * 0.001)         # 每个时间窗中含有的数据点的数量
+#     incsize = (int)(sample_rate * overlap * 0.001)        # 每个重叠时间窗中含有的数据点的数量
+#     start = 0
+#     # print winsize, incsize
+
+#     x_dim = (raw_data.shape[0] - winsize) / incsize + 1       # 矩阵的行数
+#     y_dim = raw_data.shape[1] * winsize                   # 矩阵的列数
+
+#     index = 0
+#     trains = np.zeros((x_dim, y_dim))                 # 最终生成的训练数据（信号层次）
+#     # print trains.shape, trains.dtype
+#     while start + winsize < raw_data.shape[0]:
+#         train = np.array([])
+#         for i in range(raw_data.shape[1]):                # 读取每个通道的数据
+#             cur_win_signal = raw_data[start:start + winsize, i]
+#             train = np.concatenate(
+#                 (train, cur_win_signal), axis=None)  # 将一个时间窗内的所有通道的数据组合
+#         # print train.shape
+#         trains[index] = train
+#         index += 1
+#         start += incsize
+
+#     log_file = root_path + '/' + out_dir + '/' + \
+#         subject + '_signal_class_' + str(target)
+#     np.save(log_file + '.npy', trains)                                # 保存数据
+#     np.savetxt(log_file + '.csv', trains, fmt="%s", delimiter=",")  # 保存数据
+#     print "generate_samples target ", target, " over, time elapsed:", time.time() - start_time
+
+
+# def generate_signal_dataset(dir='train1', subject='subject_1'):
+#     ''' 读取信号数据集，并生成信号数组和类别数组 '''
+#     print "----generate_signal_dataset, ", dir, subject
+#     dir_train = root_path + '/' + dir
+#     dis = os.listdir(dir_train)
+#     os.chdir(dir_train)
+
+#     diss = []
+#     for fi in dis:
+#         if re.match(subject + '_signal_class_(\d+)\.npy', fi):
+#             diss.append(fi)
+#     diss.sort(key=lambda x: int(
+#         re.match(subject + '_signal_class_(\d+)\.npy', x).group(1)))
+
+#     trains = np.array([])
+#     targets = np.array([], np.int)
+#     trains_ylim = 0
+#     for fi in diss:
+#         data = np.load(fi)
+#         print 'fi:', fi, ' :', data.shape
+#         target_num = int(
+#             re.match(subject + '_signal_class_(\d+)\.npy', fi).group(1))
+#         if trains_ylim == 0:
+#             trains_ylim = data.shape[1]
+#         target_temp = np.ones((data.shape[0],), np.int)
+#         np.multiply(target_temp, target_num, target_temp)
+#         trains = np.concatenate((trains, data), axis=None)
+#         targets = np.concatenate((targets, target_temp), axis=None)
+#     print type(targets)
+#     trains = trains.reshape((-1, trains_ylim))
+#     file_path = root_path + '/' + dir + '/' + subject
+#     np.save(file_path + '_signal_trains.npy', trains)
+#     np.save(file_path + '_signal_classes.npy', targets)
+#     np.savetxt(file_path + '_signal_trains.csv',
+#                trains, fmt="%s", delimiter=",")  # 保存数据
+#     np.savetxt(file_path + '_signal_classes.csv',
+#                targets, fmt="%s", delimiter=",")  # 保存数据

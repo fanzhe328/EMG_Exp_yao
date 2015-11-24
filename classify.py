@@ -13,8 +13,6 @@ import data_load
 import classifier_lda
 from preprocess import data_preprocess, data_normalize
 from noise_simulation import guassion_simu
-# from data_plot import plot_result
-
 
 root_path = os.getcwd()
 
@@ -64,27 +62,35 @@ def train_dataset_feature_inter(
 
 def train_dataset_feature_intra(
         train_dir='train1', subject_list=['subject_1'], feature_type='TD4', dataset='data1',
-        fold_pre='250_100', z_score=False, channel_pos_list=['O'], action_num=7, group_num=4):
+        fold_pre='250_100', z_score=False, channel_pos_list=['O'], action_num=7, chan_num=4):
+    
+    print 'train_dataset_feature_intra......'
+    
     my_clfs = ["LDA"]
     start_time = time.time()
+    
+    if feature_type == 'TD4':
+        feat_num = 4
+    elif feature_type == 'TD5':
+        feat_num = 5
+    chan_len = feat_num * chan_num
+
+    # 0均值标准化标志
+    norm = ''
     for sub in subject_list:
-        trains, classes = data_load.load_feature_dataset(train_dir, sub, feature_type)
-        chan_num = 4                        # 通道个数，4通道
+        trains, classes = data_load.load_feature_dataset(train_dir, sub, feature_type, action_num)
+        
+        # 是否进行0均值标准化
         if z_score:
             trains = data_normalize(trains)
-            sub = 'norm_' + sub
-        if feature_type == 'TD4':
-            feat_num = 4
-        elif feature_type == 'TD5':
-            feat_num = 5
-
-        chan_len = feat_num * chan_num
+            norm = '_norm'
 
         classifier_lda.training_lda_TD4_intra(
             my_clfs, trains, classes,
-            log_fold=fold_pre + '/' + feature_type + '_' + dataset + '_' + sub + '_simu1',
+            log_fold=fold_pre + '/' + feature_type + '_' + dataset + '_' + sub + norm,
             pos_list=channel_pos_list, num=1, chan_len=chan_len,action_num=action_num,
-            feature_type=feature_type,group_num=group_num)
+            feature_type=feature_type,chan_num=chan_num)
+    
     print "Total times: ", time.time() - start_time, 's'
 
 
@@ -122,8 +128,7 @@ if __name__ == '__main__':
     feature_type = 'TD4'
     # feature_type = 'TD5'
     
-    z_score = False
-    action_num = 7
+    actions = [7,9, 11]
 
     train_dir = 'train4_' + fold_pre
     input_dir = 'data4'
@@ -141,17 +146,13 @@ if __name__ == '__main__':
     z_scores = [True]
 
     for z_score in z_scores:
-        train_dataset_feature_intra(
-            train_dir, subject_list, feature_type,
-            input_dir, fold_pre, z_score, 
-            channel_pos_list,action_num)
+        for action_num in actions:
+            # 组内训练策略
+            train_dataset_feature_intra( train_dir, subject_list, feature_type,
+                input_dir, fold_pre, z_score, channel_pos_list,action_num)
+            
+            # train_dataset_feature_inter(train_dir, subject_list, feature_type,
+            #     input_dir, fold_pre, z_score, channel_pos_list,action_num)
 
-    # for z_score in z_scores:
-    #     train_dataset_feature_inter(
-    #         train_dir, subject_list, feature_type,
-    #         input_dir, fold_pre, z_score, 
-    #         channel_pos_list,action_num)
 
-    # train_dataset_feature(train_dir, subject_list,
-    #                       feature_type, input_dir, fold_pre, z_score)
-    # train_dataset_signal()
+

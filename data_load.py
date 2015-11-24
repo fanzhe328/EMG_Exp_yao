@@ -22,7 +22,6 @@ def load_signal_dataset(dir='train1', subject='subject_1'):
     classes = np.load(file_path + '_signal_classes.npy')
     return trains, classes
 
-
 def feature_normalized():
     ''' 特征归一化 2015-10-28 '''
     pass

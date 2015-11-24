@@ -38,7 +38,9 @@ def new_fold(log_fold):
             return False
     return True
 
-
+'''
+组内训练策略
+'''
 def training_lda_TD4_intra(my_clfs, trains, classes, **kw):
     start_time = time.time()
     if(kw.has_key('log_fold')):
@@ -46,22 +48,24 @@ def training_lda_TD4_intra(my_clfs, trains, classes, **kw):
     new_fold(log_fold)
 
     chan_len = kw['chan_len']
+    action_num = kw['action_num']
     cv = 5
+
     results = []
     results.append(
         ['Feat', 'Algorithm','Channel_Pos', 'Accuracy', 'std'])
+    
     log_file = 'feat_'+kw['feature_type']+'_intra'
 
     clf = sklearn.lda.LDA(solver='svd', shrinkage=None, priors=None,
                           n_components=None, store_covariance=False,
                           tol=0.0001)
 
-
     test_rate_list = [0.2]
-    data_num = trains.shape[0]/kw['action_num']
+    data_num = trains.shape[0]/action_num
 
     scores = sklearn.cross_validation.cross_val_score(clf, trains, classes, cv=cv)
-    results.append(['feat_TD4_cv_'+str(cv), 'lda(svd;tol=0.0001)', 'ALL',
+    results.append(['feat_TD4_cv_'+str(cv), 'lda', 'ALL',
                          scores.mean(), scores.std()])
     
     for idx, channel_pos in enumerate(kw['pos_list']):
@@ -70,10 +74,10 @@ def training_lda_TD4_intra(my_clfs, trains, classes, **kw):
 
         scores = sklearn.cross_validation.cross_val_score(
             clf, trains_intra, classes, cv=cv)
-        results.append(['feat_TD4_cv_'+str(cv), 'lda(svd;tol=0.0001)', channel_pos,
+        results.append(['feat_TD4_cv_'+str(cv), 'lda', channel_pos,
                          scores.mean(), scores.std()])
 
-    log_result(results, log_fold + '/' + log_file + '_' + str(kw['num']), 2)
+    log_result(results, log_fold + '/' + log_file + '_action-1' + str(action_num), 2)
     print '----Log Fold:', log_fold, ', log_file: ', log_file + '_' + str(kw['num'])
     print '----training TD4 time elapsed:', time.time() - start_time
 

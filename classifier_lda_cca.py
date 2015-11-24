@@ -1,3 +1,4 @@
+# *-* coding=utf-8 *-*
 #!/usr/lib/python
 import os, sys, time, random
 import numpy as np
@@ -40,68 +41,78 @@ def new_fold(log_fold):
     return True
 
 
+'''
+    个体内训练策略（针对同一个受试者的）
+'''
 def training_lda_TD4_intra(my_clfs, trains, classes, **kw):
+
     start_time = time.time()
     if(kw.has_key('log_fold')):
         log_fold = root_path + '/result/' + kw['log_fold']
     new_fold(log_fold)
 
     chan_len = kw['chan_len']
+    action_num = kw['action_num']
     cv = 5
     results = []
     results.append(
-        ['Feat', 'Algorithm','Channel_Pos', 'Accuracy', 'std'])
+        ['Feat', 'Algorithm','n_components', 'Channel_Pos', 'Accuracy', 'std'])
     log_file = 'feat_'+kw['feature_type']+'_intra'
 
     clf = sklearn.lda.LDA(solver='svd', shrinkage=None, priors=None,
                           n_components=None, store_covariance=False,
                           tol=0.0001)
 
-    data_num = trains.shape[0]/kw['action_num']
+    data_num = trains.shape[0]/action_num
 
     scores = sklearn.cross_validation.cross_val_score(clf, trains, classes, cv=cv)
-    results.append(['feat_TD4_cv_'+str(cv), 'lda', 'ALL', scores.mean(), scores.std()])
+    results.append(['feat_TD4_cv_'+str(cv), 'lda', 'ALL', 0, scores.mean(), scores.std()])
     
+    # 子空间维数
+    n_components_list = [6, 8, 10, 12, 14, 16]
 
     # PLS CCA
     plsca = PLSCanonical(n_components=15)
-    for idx, channel_pos in enumerate(kw['pos_list']):
-        print '----training TD4 intra CCA based, channel_pos: ', channel_pos,'......'
-        if channel_pos == 'S0':
-            trains_intra_S0 = trains[:,idx*chan_len: idx*chan_len+chan_len]
-        elif channel_pos != 'S0':
-            trains_intra_shift = trains[:,idx*chan_len: idx*chan_len+chan_len]
-            # m = trains_intra_S0.shape[0]
-            plsca.fit(trains_intra_shift, trains_intra_S0)
-            trains_intra = plsca.transform(trains_intra_shift)
+
+    for n_components in n_components_list:
+
+        for idx, channel_pos in enumerate(kw['pos_list']):
+            print '----training TD4 intra CCA based, channel_pos: ', channel_pos,'......'
+            if channel_pos == 'S0':
+                trains_intra_S0 = trains[:,idx*chan_len: idx*chan_len+chan_len]
+            elif channel_pos != 'S0':
+                trains_intra_shift = trains[:,idx*chan_len: idx*chan_len+chan_len]
+                # m = trains_intra_S0.shape[0]
+                plsca.fit(trains_intra_shift, trains_intra_S0)
+                trains_intra = plsca.transform(trains_intra_shift)
+
+                scores = sklearn.cross_validation.cross_val_score(
+                    clf, trains_intra, classes, cv=cv)
+                results.append(['feat_TD4_cv_'+str(cv), 'lda_cca', n_components, 'S0+'+channel_pos, scores.mean(), scores.std()])
+
+        for idx, channel_pos in enumerate(kw['pos_list']):
+            print '----training TD4 intra , channel_pos: ', channel_pos,'......'
+            trains_intra = trains[:,idx*chan_len: idx*chan_len+chan_len]
 
             scores = sklearn.cross_validation.cross_val_score(
                 clf, trains_intra, classes, cv=cv)
-            results.append(['feat_TD4_cv_'+str(cv), 'lda_cca', 'S0+'+channel_pos, scores.mean(), scores.std()])
+            results.append(['feat_TD4_cv_'+str(cv), 'lda', n_components, channel_pos, scores.mean(), scores.std()])
 
-    for idx, channel_pos in enumerate(kw['pos_list']):
-        print '----training TD4 intra , channel_pos: ', channel_pos,'......'
-        trains_intra = trains[:,idx*chan_len: idx*chan_len+chan_len]
-
-        scores = sklearn.cross_validation.cross_val_score(
-            clf, trains_intra, classes, cv=cv)
-        results.append(['feat_TD4_cv_'+str(cv), 'lda', channel_pos,
-                         scores.mean(), scores.std()])
-
-    for idx, channel_pos in enumerate(kw['pos_list']):
-        print '----training TD4 intra combination, channel_pos: ', channel_pos,'......'
-        trains_intra_shift = trains[:,idx*chan_len: idx*chan_len+chan_len]
-        trains_intra = np.concatenate( (trains_intra_S0, trains_intra_shift), axis=0 )
-        classes_intra = np.concatenate( (classes, classes), axis=0)
-        # print trains_intra_shift.shape, trains_intra.shape, classes_intra.shape
-        # sys.exit(0)
-        scores = sklearn.cross_validation.cross_val_score(
-            clf, trains_intra, classes_intra, cv=cv)
-        results.append(['feat_TD4_cv_'+str(cv), 'lda', channel_pos+' combine S0', scores.mean(), scores.std()])
+        for idx, channel_pos in enumerate(kw['pos_list']):
+            print '----training TD4 intra combination, channel_pos: ', channel_pos,'......'
+            trains_intra_shift = trains[:,idx*chan_len: idx*chan_len+chan_len]
+            trains_intra = np.concatenate( (trains_intra_S0, trains_intra_shift), axis=0 )
+            classes_intra = np.concatenate( (classes, classes), axis=0)
+            # print trains_intra_shift.shape, trains_intra.shape, classes_intra.shape
+            # sys.exit(0)
+            scores = sklearn.cross_validation.cross_val_score(
+                clf, trains_intra, classes_intra, cv=cv)
+            results.append(['feat_TD4_cv_'+str(cv), 'lda', n_components, channel_pos+' combine S0', scores.mean(), scores.std()])
+    
     # print results
     # sys.exit(0)
-    log_result(results, log_fold + '/' + log_file + '_' + str(kw['num']), 2)
-    print '----Log Fold:', log_fold, ', log_file: ', log_file + '_' + str(kw['num'])
+    log_result(results, log_fold + '/' + log_file + '_action_1-'+str(action_num), 2)
+    print '----Log Fold:', log_fold, ', log_file: ', log_file + '_action_1-'+str(action_num)
     print '----training TD4 time elapsed:', time.time() - start_time
 
 
