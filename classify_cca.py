@@ -38,9 +38,9 @@ def train_dataset_feature_inter(
     chan_num = 4                        # 通道个数，4通道
     chan_len = feat_num * chan_num             # 16
 
-    for sub in subject_list[1:]:
+    for sub in subject_list[0:]:
         trains, classes = data_load.load_feature_dataset(
-            train_dir, sub, feature_type)
+            train_dir, sub, feature_type, action_num)
 
         # tests_inter = np.array([])
         
@@ -75,11 +75,11 @@ def train_dataset_feature_intra(
     start_time = time.time()
     for sub in subject_list:
         trains, classes = data_load.load_feature_dataset(
-            train_dir, sub, feature_type)
+            train_dir, sub, feature_type, action_num)
         chan_num = 4                        # 通道个数，4通道
         if z_score:
             trains = data_normalize(trains)
-            sub = 'norm_' + sub
+            subject = 'norm_' + sub
         if feature_type == 'TD4':
             feat_num = 4
         if feature_type == 'TD5':
@@ -133,11 +133,11 @@ if __name__ == '__main__':
             input_dir, fold_pre, z_score,
             channel_pos_list,action_num)
 
-    # for z_score in z_scores:
-    #     train_dataset_feature_inter(
-    #         train_dir, subject_list, feature_type,
-    #         input_dir, fold_pre, z_score,
-    #         channel_pos_list, action_num)
+    for z_score in z_scores:
+        train_dataset_feature_inter(
+            train_dir, subject_list, feature_type,
+            input_dir, fold_pre, z_score,
+            channel_pos_list, action_num)
 
     # train_dataset_feature(train_dir, subject_list,
     #                       feature_type, input_dir, fold_pre, z_score)

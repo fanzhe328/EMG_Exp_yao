@@ -51,11 +51,7 @@ def train_dataset_feature_inter(
             trains_simu = data_normalize(trains_simu)
             tests_inter = data_normalize(tests_inter)
             sub = 'norm_' + sub
-
-        # print channel_pos_list
-        # print trains_inter.shape, tests_inter.shape
-        # sys.exit(0)
-# 
+            
         num = 3
 
         classifier_lda.training_lda_TD4_inter(
@@ -79,7 +75,7 @@ def train_dataset_feature_intra(
             sub = 'norm_' + sub
         if feature_type == 'TD4':
             feat_num = 4
-        if feature_type == 'TD5':
+        elif feature_type == 'TD5':
             feat_num = 5
 
         chan_len = feat_num * chan_num
@@ -133,9 +129,7 @@ if __name__ == '__main__':
     input_dir = 'data4'
     chan_num = 4
     subject_list = ['subject_' + str(i) for i in range(1, 6)]
-    # channel_pos_list = ['O',								# 中心位置
-    #                     'A1', 'B1', 'C1', 'D1', 'E1', 'F1', 'G1', 'H1',		# 八方位 1cm 模拟：右，右下，下，左下，左，左上，上，右上
-    #                     'A2', 'B2', 'C2', 'D2', 'E2', 'F2', 'G2', 'H2']		# 八方位 2cm 模拟：同上
+
     channel_pos_list = ['S0',                                             # 中心位置
                         'U1', 'U2', 'D1', 'D2', 'L1', 'L2', 'R1', 'R2']  # 上 下 左 右
     # channel_pos_list = ['O']

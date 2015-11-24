@@ -45,7 +45,7 @@ def data_trainsform(data):
 
     return res
 
-def load_raw_dataset(dir='data1', subject='subject_1'):
+def load_raw_dataset(dir='data1', subject='subject_1', action_num=11):
     ''' 姚传存师兄的数据集'''
     dir_train = root_path + '/' + dir
     # 原始文件名称，已经截取动作片， dir表示实验组名称，subject表示受试者
@@ -53,12 +53,15 @@ def load_raw_dataset(dir='data1', subject='subject_1'):
 
     data = sio.loadmat(mat_file)
     classes = data['motions']
-
-    # 选取7个动作，FPG，KG，FP，WF，WE，HC，NM
-    # class_idx = np.array([2,7,3,11,10,5,8]) - 1         
-    
-    # 选取11个动作，FPG，KG，FP，WF，WE，HC，NM, CG, FS, HO, TG
-    class_idx = np.array([2,7,3,11,10,5,8,1,4,6,9]) - 1
+    if action_num == 7:
+        # 选取7个动作，FPG，KG，FP，WF，WE，HC，NM
+        class_idx = np.array([2,7,3,11,10,5,8]) - 1 
+    elif action_num == 9:
+        # 选取11个动作，FPG，KG，FP，WF，WE，HC，NM, CG, FS
+        class_idx = np.array([2,7,3,11,10,5,8,1,4]) - 1
+    elif action_num == 11:
+        # 选取11个动作，FPG，KG，FP，WF，WE，HC，NM, CG, FS, HO, TG
+        class_idx = np.array([2,7,3,11,10,5,8,1,4,6,9]) - 1
 
     times = data['times']
     chan_num = data['channels']
@@ -119,7 +122,7 @@ def generate_signal_dataset(dir='train1', subject='subject_1'):
                targets, fmt="%s", delimiter=",")  # 保存数据
 
 
-def generate_feature_dataset(dir='train1', subject='subject_1', feature_type='TD4'):
+def generate_feature_dataset(dir='train1', subject='subject_1', feature_type='TD4', action_num=11):
     ''' 读取特征数据集，并生成特征数组和类别数组 '''
     print "----generate_feature_dataset, ", dir, subject
     dir_train = root_path + '/' + dir
@@ -147,6 +150,10 @@ def generate_feature_dataset(dir='train1', subject='subject_1', feature_type='TD
         data = np.load(fi)
         target_num = int(
             re.match(match_template, fi).group(1))
+        print 'Add ', target_num
+        if target_num>action_num:
+            print 'Drop ', target_num
+            continue
         # target_num = (int)target_num
         # print type(target_num)
         if trains_ylim == 0:
@@ -157,11 +164,11 @@ def generate_feature_dataset(dir='train1', subject='subject_1', feature_type='TD
         targets = np.concatenate((targets, target_temp), axis=None)
     trains = trains.reshape((-1, trains_ylim))
     file_path = root_path + '/' + dir + '/' + subject
-    np.save(file_path + '_feat_'+feature_type +'_trains.npy', trains)
-    np.save(file_path + '_feat_'+feature_type +'_classes.npy', targets)
-    np.savetxt(file_path + '_feat_'+feature_type +'_trains.csv',
+    np.save(file_path + '_feat_'+feature_type +'_trains_1-'+str(action_num)+'.npy', trains)
+    np.save(file_path + '_feat_'+feature_type +'_classes_1-'+str(action_num)+'.npy', targets)
+    np.savetxt(file_path + '_feat_'+feature_type +'_trains_1-'+str(action_num)+'.csv',
                trains, fmt="%s", delimiter=",")  # 保存数据
-    np.savetxt(file_path + '_feat_'+feature_type +'_classes.csv',
+    np.savetxt(file_path + '_feat_'+feature_type +'_classes_1-'+str(action_num)+'.csv',
                targets, fmt="%s", delimiter=",")  # 保存数据
     print '----Save success, dir', dir, ', subject:', subject
     # print data.shape, target_temp.shape, target_num, target_temp[0]
@@ -250,22 +257,22 @@ def feature_extract(raw_data, target, window, overlap, sample_rate, feature_type
     print "----feature_extract target ", target, " over, time elapsed:", time.time() - start_time
 
 
-def data_preprocess(input_dir='data1', train_dir='train1', feature_type='TD4', 
-                        subject_list=[1], winsize=250, incsize=100, samrate=1024, feat_num=4):
+def data_preprocess(input_dir='data1', train_dir='train1', feature_type='TD4', subject_list=[1],
+                    winsize=250, incsize=100, samrate=1024, feat_num=4, action_num=11):
     ''' 预处理，生成未标准化（Z-Score）的数据样本和类别 '''
     print "data_preprocess................."
     start_time = time.time()
 
     for sub in subject_list:
         print "----Running ", sub, '....................'
-        trains = load_raw_dataset(input_dir, sub)
+        trains = load_raw_dataset(input_dir, sub, action_num)
 
-        for i in range(len(trains)):                # 动作的数量
-            feature_extract(trains[i], i + 1, winsize, incsize,     #提取第i个动作的特征
-                            samrate, feature_type, train_dir, sub, feat_num)
+        # for i in range(len(trains)):                # 动作的数量
+        #     feature_extract(trains[i], i + 1, winsize, incsize,     #提取第i个动作的特征
+        #                     samrate, feature_type, train_dir, sub, feat_num)
             ### generate_samples(trains[i], i+1, winsize, incsize, samrate)
         
-        generate_feature_dataset(train_dir, sub, feature_type)
+        generate_feature_dataset(train_dir, sub, feature_type, action_num)
         # sys.exit(0)
         # generate_signal_dataset(train_dir, sub)
     print "data_preprocess time elapsed: ", time.time() - start_time
@@ -282,9 +289,10 @@ if __name__ == '__main__':
     
     feature_type = 'TD4'
     feat_num = 4
-    
-    feature_type = 'TD5'
-    feat_num = 5
+    action_num = 9
+
+    # feature_type = 'TD5'
+    # feat_num = 5
     
     subject_list = ['subject_' + str(i) for i in range(1, 6)]
     # print subject_list
@@ -294,7 +302,7 @@ if __name__ == '__main__':
     samrate=1024
     train_dir = train_dir+'_'+str(winsize)+'_'+str(incsize)
     data_preprocess(input_dir, train_dir, feature_type, subject_list,
-                    winsize, incsize, samrate, feat_num)
+                    winsize, incsize, samrate, feat_num, action_num)
     print 'TD4 finished'
     # feature_type = 'TD5'
     # data_preprocess(input_dir, train_dir, feature_type, subject_list,
