@@ -102,7 +102,6 @@ def train_dataset_feature_intra(
 
     print "Total times: ", time.time() - start_time, 's'
 
-
 def main():
     pass
 

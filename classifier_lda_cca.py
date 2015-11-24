@@ -72,10 +72,9 @@ def training_lda_TD4_intra(my_clfs, trains, classes, **kw):
     n_components_list = [6, 8, 10, 12, 14, 16]
 
     # PLS CCA
-    plsca = PLSCanonical(n_components=15)
-
+    
     for n_components in n_components_list:
-
+        plsca = PLSCanonical(n_components=n_components)
         for idx, channel_pos in enumerate(kw['pos_list']):
             print '----training TD4 intra CCA based, channel_pos: ', channel_pos,'......'
             if channel_pos == 'S0':
@@ -90,24 +89,26 @@ def training_lda_TD4_intra(my_clfs, trains, classes, **kw):
                     clf, trains_intra, classes, cv=cv)
                 results.append(['feat_TD4_cv_'+str(cv), 'lda_cca', n_components, 'S0+'+channel_pos, scores.mean(), scores.std()])
 
-        for idx, channel_pos in enumerate(kw['pos_list']):
-            print '----training TD4 intra , channel_pos: ', channel_pos,'......'
-            trains_intra = trains[:,idx*chan_len: idx*chan_len+chan_len]
 
-            scores = sklearn.cross_validation.cross_val_score(
-                clf, trains_intra, classes, cv=cv)
-            results.append(['feat_TD4_cv_'+str(cv), 'lda', n_components, channel_pos, scores.mean(), scores.std()])
+    for idx, channel_pos in enumerate(kw['pos_list']):
+        print '----training TD4 intra , channel_pos: ', channel_pos,'......'
+        trains_intra = trains[:,idx*chan_len: idx*chan_len+chan_len]
 
-        for idx, channel_pos in enumerate(kw['pos_list']):
-            print '----training TD4 intra combination, channel_pos: ', channel_pos,'......'
-            trains_intra_shift = trains[:,idx*chan_len: idx*chan_len+chan_len]
-            trains_intra = np.concatenate( (trains_intra_S0, trains_intra_shift), axis=0 )
-            classes_intra = np.concatenate( (classes, classes), axis=0)
-            # print trains_intra_shift.shape, trains_intra.shape, classes_intra.shape
-            # sys.exit(0)
-            scores = sklearn.cross_validation.cross_val_score(
-                clf, trains_intra, classes_intra, cv=cv)
-            results.append(['feat_TD4_cv_'+str(cv), 'lda', n_components, channel_pos+' combine S0', scores.mean(), scores.std()])
+        scores = sklearn.cross_validation.cross_val_score(
+            clf, trains_intra, classes, cv=cv)
+        results.append(['feat_TD4_cv_'+str(cv), 'lda', 0, channel_pos, scores.mean(), scores.std()])
+
+    for idx, channel_pos in enumerate(kw['pos_list']):
+        print '----training TD4 intra combination, channel_pos: ', channel_pos,'......'
+        trains_intra_shift = trains[:,idx*chan_len: idx*chan_len+chan_len]
+        trains_intra = np.concatenate( (trains_intra_S0, trains_intra_shift), axis=0 )
+        classes_intra = np.concatenate( (classes, classes), axis=0)
+        # print trains_intra_shift.shape, trains_intra.shape, classes_intra.shape
+        # sys.exit(0)
+        scores = sklearn.cross_validation.cross_val_score(
+            clf, trains_intra, classes_intra, cv=cv)
+        results.append(['feat_TD4_cv_'+str(cv), 'lda', 0, channel_pos+' combine S0', scores.mean(), scores.std()])
+
     
     # print results
     # sys.exit(0)
