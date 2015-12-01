@@ -12,7 +12,7 @@ from sklearn import preprocessing
 root_path = os.getcwd()
 
 def data_trainsform(data):
-    idx_S0 = np.array([17, 19, 45, 47]) - 1
+    idx_S0 = np.array([17, 20, 45, 48]) - 1
     chan_num = len(idx_S0)
     res = np.zeros( (data.shape[0], 36) )       # 4*9=36, 9表示电极位置的九种情况：原点，上1cm，上2cm，下1cm，下2cm...
     
@@ -209,6 +209,7 @@ if __name__ == '__main__':
     # feature_type = 'TD4'
     # feat_num = 4
     actions = [7, 9, 11]
+    # actions = [11]
     # action_num = 11
     # feature_type = 'TD5'
     # feat_num = 5

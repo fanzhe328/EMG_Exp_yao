@@ -9,14 +9,14 @@ root_path = os.getcwd()
 
 from preprocess import load_raw_dataset
 
-def feature_action_sensitivity():
+def feature_action_sensitivity(action_num=7):
     ''' 对每个特征，分析其在不移位和移位情况下的差异性 '''
     results = []
     channel_pos_list = ['S0',                                             # 中心位置
                         'U1', 'U2', 'D1', 'D2', 'L1', 'L2', 'R1', 'R2']  # 上 下 左 右
     subjects = ['subject_' + str(i + 1) for i in range(5)]
     feature_list = ['MAV', 'ZC', 'SSC', 'WL']
-    actions = [i+1 for i in range(7)]
+    actions = [i+1 for i in range(action_num)]
     groups = [i+1 for i in range(4)]
     channel_num = len(channel_pos_list)*len(groups)
     feat_num = len(feature_list)
