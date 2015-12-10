@@ -50,7 +50,8 @@ def feature_action_sensitivity(feature_type='TD4'):
             # print trains.shape, classes.shape, m
             # print group_span, group_span*2
             # sys.exit(0)
-            m = trains.shape[0]*2/3
+            # m = trains.shape[0]*2/3
+            m = trains.shape[0]/2
             X_train = trains[:m, group_span*pos: group_span*(pos+1)]
             Y_train = trains[:m:, :group_span]
             X_test = trains[m:, group_span*pos: group_span*(pos+1)]
@@ -135,7 +136,7 @@ def plot_plsc_figure_two(X_train_r,Y_train_r,X_test_r, Y_test_r, filename):
     plt.plot(X_test_r[:, 0], Y_test_r[:, 0], "or", label="test")
     plt.xlabel("x scores")
     plt.ylabel("y scores")
-    plt.title('Dimensino 1: X vs Y (test corr = %.2f)' %
+    plt.title('Dimension 1: X vs Y (test corr = %.2f)' %
               np.corrcoef(X_test_r[:, 0], Y_test_r[:, 0])[0, 1])
     plt.xticks(())
     plt.yticks(())

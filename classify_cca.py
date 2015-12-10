@@ -12,6 +12,7 @@ import time
 import data_load
 import classifier_lda_cca
 from preprocess import data_preprocess, data_normalize
+from result_integrate import result_integrate_intra
 
 # from noise_simulation import guassion_simu
 # from data_plot import plot_result
@@ -127,3 +128,6 @@ if __name__ == '__main__':
 
             # train_dataset_feature_inter(train_dir, subject_list, feature_type,
             #     input_dir, fold_pre, z_score,channel_pos_list, action_num)
+    
+    time_now = time.strftime('%Y-%m-%d_%H-%M',time.localtime(time.time()))
+    result_integrate_intra(time_now)

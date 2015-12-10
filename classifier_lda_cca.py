@@ -11,12 +11,6 @@ import sklearn.svm
 from sklearn.cross_decomposition import PLSCanonical
 from sklearn.cross_validation import KFold
 from sklearn.externals import joblib
-# from noise_simulation import proportion_simu
-# from sklearn import linear_model
-# from sklearn.lda import LDA
-# from sklearn.qda import QDA
-# from sklearn.svm import SVC, LinearSVC
-# from sklearn.naive_bayes import GaussianNB
 
 root_path = os.getcwd()
 transform_fold = root_path + '/result/transform'
@@ -53,7 +47,7 @@ def training_lda_TD4_intra(my_clfs, trains, classes, **kw):
 
     chan_len = kw['chan_len']
     action_num = kw['action_num']
-    cv = 4
+    cv = 3
     results = []
     results.append(
         ['Feat', 'Algorithm','n_components', 'Channel_Pos', 'Accuracy', 'std'])
